@@ -2,6 +2,11 @@
 
 All notable changes to Eventual RSVP – Core (formerly Eventual) are documented here.
 
+## 0.18.4 - 2026-11-17
+
+- **npm package: Block Kit is now an optional peer dependency** (`@emdash-cms/blocks >=1.2.0 <2.0.0`) instead of an exact 1.4.0 dependency. Eventual only uses its types, so sites use the Block Kit their EmDash installs. With the exact pin, an EmDash 1.5 site that also uses `@emdash-cms/cloudflare` 1.5.0 could not install the package without an npm or pnpm override.
+- No runtime, permission or schema changes; the registry plugin is unchanged apart from its version.
+
 ## 0.18.3 - 2026-11-17
 
 - **EmDash 1.5 support:** tested on EmDash 1.5.0. The source installer's admin adapter now recognises the 1.5 content-editor panel, which dropped an unused `reserveHeaderEnd` prop.

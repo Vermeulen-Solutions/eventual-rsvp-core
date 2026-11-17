@@ -1,6 +1,6 @@
 {
   "name": "@vermeulen.solutions/eventual",
-  "version": "0.18.3",
+  "version": "0.18.4",
   "license": "MIT",
   "homepage": "https://eventual.rsvp/",
   "type": "module",
@@ -65,7 +65,8 @@
     "docs/release-notes-0.18.0.md",
     "docs/release-notes-0.18.1.md",
     "docs/release-notes-0.18.2.md",
-    "docs/release-notes-0.18.3.md"
+    "docs/release-notes-0.18.3.md",
+    "docs/release-notes-0.18.4.md"
   ],
   "scripts": {
     "validate": "emdash-plugin validate",
@@ -90,6 +91,7 @@
   },
   "peerDependencies": {
     "@emdash-cms/admin": ">=1.2.0 <2.0.0",
+    "@emdash-cms/blocks": ">=1.2.0 <2.0.0",
     "astro": ">=7.3.2 <8.0.0",
     "emdash": ">=1.2.0 <2.0.0",
     "kysely": "^0.29.0",
@@ -98,6 +100,7 @@
   },
   "devDependencies": {
     "@emdash-cms/admin": "1.4.0",
+    "@emdash-cms/blocks": "1.4.0",
     "@emdash-cms/plugin-cli": "0.13.5",
     "@emdash-cms/plugin-test": "0.2.11",
     "@playwright/test": "1.64.1",
@@ -109,7 +112,6 @@
     "vitest": "^4.1.0"
   },
   "dependencies": {
-    "@emdash-cms/blocks": "1.4.0",
     "@lingui/core": "5.9.5",
     "zod": "4.5.4",
     "@vermeulen.solutions/eventual-locales": "0.1.10"
@@ -119,19 +121,22 @@
     "workerd": true
   },
   "peerDependenciesMeta": {
+    "@emdash-cms/admin": {
+      "optional": true
+    },
+    "@emdash-cms/blocks": {
+      "optional": true
+    },
     "astro": {
       "optional": true
     },
-    "vite": {
-      "optional": true
-    },
-    "@emdash-cms/admin": {
+    "kysely": {
       "optional": true
     },
     "react": {
       "optional": true
     },
-    "kysely": {
+    "vite": {
       "optional": true
     }
   },
