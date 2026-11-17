@@ -25,13 +25,15 @@ Releases before 0.18.1 were not on npm; their source archives (`eventual-<versio
 To build the same helpers from the release checkout, run `npm ci`, `npm run build`
 and `npm pack`. Keep helper and backend versions aligned.
 
-Source tooling needs Node 24+. Peer ranges are in [package.json](../package.json); release acceptance uses EmDash/Admin/Block Kit **1.2.0 and 1.4.0**, Astro 7.3.x/7.4.x and React 19. The source `@vermeulen.solutions/eventual/install` lane accepts 1.2.0 and 1.4.0; Registry installs never execute that transform.
+Source tooling needs Node 24+. Peer ranges are in [package.json](../package.json); release acceptance uses EmDash/Admin/Block Kit **1.2.0 and 1.4.0**, Astro 7.3.x/7.4.x and React 19. The source `@vermeulen.solutions/eventual/install` lane is tested on 1.2.0, 1.4.0 and 1.5.0. It refuses only hosts older than 1.2.0; a newer untested host builds with a warning, and an editor adapter that no longer matches the admin build steps aside (with a warning) so EmDash's own editor is used. Registry installs never execute that transform.
 
 | Host | Status | Notes |
 | --- | --- | --- |
 | 1.2.0 | supported, unit-tested | Panel Enter/validation is scoped to the outer content-editor form; Cloudflare cross-isolate plugin mutations can fail. |
 | 1.3.x | supported, untested | Same form/Cloudflare limitations; includes the plugin-storage cursor fix. |
 | 1.4.x | supported, full acceptance | Recommended. Fixes nested Block Kit forms and Cloudflare plugin mutations. |
+| 1.5.x | supported, host-tested | 1.5.0 passes the native-site and plugin integration suites; the admin adapter recognises its editor panel. |
+| newer | allowed with a warning | Not yet tested. Check the event editor after upgrading. |
 
 ## Public routes
 

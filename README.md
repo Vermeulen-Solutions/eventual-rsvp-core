@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/Vermeulen-Solutions/eventual-rsvp-core/actions/workflows/ci.yml"><img src="https://github.com/Vermeulen-Solutions/eventual-rsvp-core/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
   <a href="https://github.com/Vermeulen-Solutions/eventual-rsvp-core/releases"><img src="https://img.shields.io/github/v/release/Vermeulen-Solutions/eventual-rsvp-core?color=176b57&label=GitHub%20download" alt="Latest GitHub source download" /></a>
-  <a href="https://plugins.emdashcms.com/plugins/@vermeulen.solutions/eventual"><img src="https://img.shields.io/badge/EmDash_Registry-0.18.2-0b4d3d" alt="EmDash Plugin Registry" /></a>
+  <a href="https://plugins.emdashcms.com/plugins/@vermeulen.solutions/eventual"><img src="https://img.shields.io/badge/EmDash_Registry-0.18.3-0b4d3d" alt="EmDash Plugin Registry" /></a>
   <a href="https://emdashcms.com"><img src="https://img.shields.io/badge/EmDash-1.2.x%20%7C%201.4.x-0b4d3d" alt="EmDash Compatibility" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-d89521" alt="License: MIT" /></a>
   <img src="https://img.shields.io/badge/TypeScript-strict-3178c6" alt="TypeScript Strict" />
@@ -43,7 +43,7 @@ In 0.14.x, old events stored inside the plugin are shown only when an administra
 For the opt-in HTML cache integration, see [public feed caching](./docs/public-feed-caching.md)
 and [release notes](./docs/release-notes-0.15.0.md). Eventual RSVP does not enable site caching.
 
-Requires **EmDash >=1.2.0 <2.0.0**; tested on 1.2.0 and 1.4.0. **1.4.0 is recommended** because it fixes nested Block Kit forms and Cloudflare plugin mutations; 1.2/1.3 remain supported with those host limitations. Upgrades from 0.12.x or earlier need the [native-content upgrade](./docs/upgrade-0.13.0.md). Source/developer tooling needs Node 24+.
+Requires **EmDash >=1.2.0 <2.0.0**; tested on 1.2.0, 1.4.0 and 1.5.0. **1.4.0 or newer is recommended** because it fixes nested Block Kit forms and Cloudflare plugin mutations; 1.2/1.3 remain supported with those host limitations. Newer EmDash releases that have not been tested yet are not refused: the source installer prints a warning, and if the editor adapters no longer match a newer admin build they step aside and EmDash's own editor is used. Upgrades from 0.12.x or earlier need the [native-content upgrade](./docs/upgrade-0.13.0.md). Source/developer tooling needs Node 24+.
 
 ---
 

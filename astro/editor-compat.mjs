@@ -8,6 +8,12 @@
  * behaviour that the host renderer does not provide.
  */
 import { fileURLToPath } from "node:url";
+const warned = new Set();
+export function warnOnce(message) {
+  if (warned.has(message)) return;
+  warned.add(message);
+  console.warn("[eventual] " + message);
+}
 const presentationModule = fileURLToPath(new URL("./editor-i18n.mjs",import.meta.url)).replaceAll("\\","/");
 export function patchEmbeddedBlockForms(source) {
   const marker = "function FormBlockComponent({ block, onAction }) {";
@@ -117,6 +123,18 @@ function addUseIdImport(source) {
     `import { ${names.join(", ")} } from "react";`,
   );
 }
+/**
+ * Apply an adapter patch, or leave the host module untouched when its build is not one we recognise.
+ * A newer EmDash then shows stock editor behaviour (untranslated labels, host form handling) instead
+ * of failing the whole site build.
+ */
+export function patchOrPassThrough(patch, source, what, warn = warnOnce) {
+  try { return { code: patch(source), map: null }; }
+  catch (error) {
+    warn(`${what} did not match this EmDash build (${error.message}); using the stock EmDash editor for it. Check the event editor and report the EmDash version.`);
+    return null;
+  }
+}
 export function eventualEditorCompatibility() {
   let command = "serve";
   return {
@@ -129,7 +147,7 @@ export function eventualEditorCompatibility() {
       // the regular transform below; applying both duplicates the admin module.
       return { optimizeDeps: { exclude: ["@emdash-cms/blocks"], rolldownOptions: {plugins:[{name:"eventual-admin-presentation-1.0.1", transform(source,id) {
         if (command !== "serve") return null;
-        if (id.replaceAll("\\", "/").endsWith("/@emdash-cms/admin/dist/index.js")) return {code:patchEventualPresentation(source),map:null};
+        if (id.replaceAll("\\", "/").endsWith("/@emdash-cms/admin/dist/index.js")) return patchOrPassThrough(patchEventualPresentation, source, "Eventual's admin presentation adapter");
         return null;
       }}]} } };
     },
@@ -138,7 +156,7 @@ export function eventualEditorCompatibility() {
       if (path.endsWith("/@emdash-cms/admin/dist/index.js"))
         return command === "serve"
           ? null
-          : { code: patchEventualPresentation(source), map: null };
+          : patchOrPassThrough(patchEventualPresentation, source, "Eventual's admin presentation adapter");
       if (
         !id
           .replaceAll("\\", "/")
@@ -146,7 +164,7 @@ export function eventualEditorCompatibility() {
           .endsWith("/@emdash-cms/blocks/dist/index.js")
       )
         return null;
-      return { code: patchEmbeddedBlockForms(source), map: null };
+      return patchOrPassThrough(patchEmbeddedBlockForms, source, "Eventual's Block Kit form adapter");
     },
   };
 }
@@ -154,7 +172,12 @@ export function eventualEditorCompatibility() {
 /** Presentation adapter for the tested admin build. RPC and receipts stay untouched. */
 export function patchEventualPresentation(source) {
   const original = 'import { BlockRenderer, isSafePluginPagePath, normalizePluginPagePath } from "@emdash-cms/blocks";';
-  const panel = 'function SandboxedContentEditorPanel({ pluginId, panelId, title, collection, entryId, locale, versionToken, draftAccess, captureDraft, onDraftResponse, onEntryRefresh, reserveHeaderEnd = false }) {';
+  // EmDash 1.5 dropped the unused `reserveHeaderEnd` prop from the panel host; accept both builds.
+  const panelSignatures = [
+    'function SandboxedContentEditorPanel({ pluginId, panelId, title, collection, entryId, locale, versionToken, draftAccess, captureDraft, onDraftResponse, onEntryRefresh, reserveHeaderEnd = false }) {',
+    'function SandboxedContentEditorPanel({ pluginId, panelId, title, collection, entryId, locale, versionToken, draftAccess, captureDraft, onDraftResponse, onEntryRefresh }) {',
+  ];
+  const panel = panelSignatures.find(signature => source.includes(signature)) ?? panelSignatures[0];
   const fieldLabel = 'return field?.label || slug.charAt(0).toUpperCase() + slug.slice(1);';
   const preview = 'function EditorDraftPatchPreview({ operations, fields, currentValues, onApply, onClose }) {';
   const editPage = 'function ContentEditPage() {';
@@ -191,7 +214,9 @@ function BlockRenderer(props) {
     patched=patched.replace('function SettingsActionBar({ collectionLabel,','function SettingsActionBar({ eventualUi=false, collectionLabel,');
     if(!patched.includes('function SettingsActionBar({ eventualUi=false, collectionLabel,')) throw new Error("Unsupported settings action bar signature.");
   }
-  const publishPattern=/function PublishActions\(\{ collectionLabel, (isNew, isLive, hasPendingChanges, publishingState, isPending, disabled, onPublish, onUnpublish, onMenuOpenChange, size, (?:fullWidth|compact)) \}\) \{\n\tconst \{ _: _t4 \} = useLingui\(\);/;
+  // Only Eventual's own prop is prepended, so any host prop list is kept as is (1.5 renamed
+  // \`disabled\` and added \`revisions\`).
+  const publishPattern=/function PublishActions\(\{ collectionLabel, (isNew, [^{}]*?) \}\) \{\r?\n\tconst \{ _: _t4 \} = useLingui\(\);/;
   if(!publishPattern.test(patched)) throw new Error("Unsupported publish actions signature.");
   return patched.replace(publishPattern, (_match, props) => `function PublishActions({ eventualUi=false, collectionLabel, ${props} }) {\n const {locale: eventualPublishLocale}=useLocale(); const {_:eventualPublishT}=useLingui(); const _t4=eventualUi ? message=>eventualEditorText(eventualPublishT(message),eventualPublishLocale):eventualPublishT;`);
 }

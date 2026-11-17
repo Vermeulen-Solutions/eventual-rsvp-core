@@ -2,6 +2,14 @@
 
 All notable changes to Eventual RSVP – Core (formerly Eventual) are documented here.
 
+## 0.18.3 - 2026-11-17
+
+- **EmDash 1.5 support:** tested on EmDash 1.5.0. The source installer's admin adapter now recognises the 1.5 content-editor panel, which dropped an unused `reserveHeaderEnd` prop.
+- **Newer EmDash versions are no longer refused.** `emdashWithEventual()` used to stop the build on any EmDash, admin or Blocks version outside the tested list. It now refuses only versions older than the oldest tested release (1.2.0) and prints a warning for newer untested ones. The same applies to Astro, Vite and React newer than the tested range.
+- **Editor adapters step aside instead of failing the build.** If a newer admin or Blocks build no longer matches, Eventual prints a warning and uses EmDash's own editor for that part (for example untranslated panel labels) instead of stopping the site build.
+- **Test suite:** the runtime integration suites no longer expire once their November 2026 fixture dates are in the past.
+- No permission or schema changes, and no new MCP tools.
+
 ## 0.18.2 - 2026-11-14
 
 - **Registry page:** new screenshots (the event editor, the public calendar, an event page and Event settings), and a description tab with links to the website, documentation and support.

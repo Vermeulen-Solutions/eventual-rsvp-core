@@ -1,6 +1,6 @@
 {
   "name": "@vermeulen.solutions/eventual",
-  "version": "0.18.2",
+  "version": "0.18.3",
   "license": "MIT",
   "homepage": "https://eventual.rsvp/",
   "type": "module",
@@ -64,7 +64,8 @@
     "docs/release-notes-0.17.0.md",
     "docs/release-notes-0.18.0.md",
     "docs/release-notes-0.18.1.md",
-    "docs/release-notes-0.18.2.md"
+    "docs/release-notes-0.18.2.md",
+    "docs/release-notes-0.18.3.md"
   ],
   "scripts": {
     "validate": "emdash-plugin validate",

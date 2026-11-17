@@ -53,6 +53,20 @@ test("the tested admin adapter only changes presentation and rejects unknown bui
   assert.equal(translated.includes("onDraftResponse(response)"), source.includes("onDraftResponse(response)"));
   assert.throws(() => patchEventualPresentation("different build"), /Unsupported/);
 });
+test("the admin adapter also patches the EmDash 1.5 panel host, which dropped reserveHeaderEnd", () => {
+  const source14 = readFileSync(new URL("../node_modules/@emdash-cms/admin/dist/index.js", import.meta.url), "utf8");
+  const signature14 = "onDraftResponse, onEntryRefresh, reserveHeaderEnd = false }) {";
+  assert.ok(source14.includes(signature14), "the installed admin build is the 1.4 shape this test derives from");
+  // 1.5 also renamed `disabled` and added `revisions` on PublishActions.
+  const publish14 = /function PublishActions\(\{ collectionLabel, isNew, isLive, hasPendingChanges, publishingState, isPending, disabled, onPublish, onUnpublish, onMenuOpenChange, size, (\w+) \}\)/;
+  assert.match(source14, publish14);
+  const source15 = source14.replace(signature14, "onDraftResponse, onEntryRefresh }) {")
+    .replace(publish14, (_m, last) => `function PublishActions({ collectionLabel, isNew, isLive, hasPendingChanges, publishingState, isPending, disabled: disabledProp, onPublish, onUnpublish, onMenuOpenChange, size, ${last}, revisions })`);
+  const translated = patchEventualPresentation(source15);
+  assert.ok(translated.includes(`function PublishActions({ eventualUi=false, collectionLabel, isNew, isLive, hasPendingChanges, publishingState, isPending, disabled: disabledProp,`));
+  assert.ok(translated.includes('onDraftResponse, onEntryRefresh }) {\n const {locale: eventualUiLocale}=useLocale();\n if(pluginId === "eventual") title=eventualEditorText(title,eventualUiLocale);'));
+  assert.match(translated, /localizeEventualBlocks/);
+});
 test("draft review shows names, civil dates and human recurrence without changing values", () => {
   localizeEventualBlocks([{type:"context",block_id:"eventual-ui"},{type:"combobox",action_id:"venue",options:[{value:"stable-row",label:"School — Rue de l’École [EN]"}]}],"fr");
   assert.equal(draftSummary("venue_id","stable-row","fr"),"School — Rue de l’École [EN]");

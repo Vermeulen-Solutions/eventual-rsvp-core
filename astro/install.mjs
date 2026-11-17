@@ -4,13 +4,14 @@ import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { eventualEditor } from "./descriptor.mjs";
-import { eventualEditorCompatibility } from "./editor-compat.mjs";
+import { eventualEditorCompatibility, warnOnce } from "./editor-compat.mjs";
+export { warnOnce };
 
 const require = createRequire(import.meta.url);
 export const testedVersions = Object.freeze({
-  emdash: Object.freeze(["1.2.0", "1.4.0"]),
-  "@emdash-cms/admin": Object.freeze(["1.2.0", "1.4.0"]),
-  "@emdash-cms/blocks": Object.freeze(["1.2.0", "1.4.0"]),
+  emdash: Object.freeze(["1.2.0", "1.4.0", "1.5.0"]),
+  "@emdash-cms/admin": Object.freeze(["1.2.0", "1.4.0", "1.5.0"]),
+  "@emdash-cms/blocks": Object.freeze(["1.2.0", "1.4.0", "1.5.0"]),
 });
 export const testedToolchain = Object.freeze({astro:"7.3.x-7.4.x (>=7.3.2 <7.5.0)",vite:"8.3.x",react:"19.x"});
 export function installedVersion(name, resolver = require) {
@@ -25,19 +26,35 @@ export function installedVersion(name, resolver = require) {
     directory = parent;
   }
 }
-export function checkEditorVersions(resolveVersion = installedVersion) {
+/** Compare dotted versions numerically; prerelease tags are ignored. */
+export function compareVersions(a, b) {
+  const pa = String(a).split("-")[0].split(".").map(Number), pb = String(b).split("-")[0].split(".").map(Number);
+  for (let i = 0; i < 3; i++) if ((pa[i] ?? 0) !== (pb[i] ?? 0)) return (pa[i] ?? 0) - (pb[i] ?? 0);
+  return 0;
+}
+/**
+ * Versions older than the oldest tested release have known-incompatible shapes and are refused.
+ * Newer untested releases are allowed with a warning: the editor adapters fall back to stock
+ * EmDash behaviour if a build no longer matches, so an EmDash update never blocks a site.
+ */
+export function checkEditorVersions(resolveVersion = installedVersion, warn = warnOnce) {
   const versions = Object.fromEntries(Object.keys(testedVersions).map(name => [name, resolveVersion(name)]));
   for (const [name, version] of Object.entries(versions)) {
     const expected = testedVersions[name];
-    if (!expected.includes(version)) throw new Error(`Eventual editor requires tested ${name} ${expected.join(" or ")}; found ${version}. Use the documented compatibility matrix before upgrading.`);
+    if (expected.includes(version)) continue;
+    if (compareVersions(version, expected[0]) < 0) throw new Error(`Eventual editor requires ${name} ${expected[0]} or newer; found ${version}. Upgrade EmDash first.`);
+    warn(`${name} ${version} has not been tested with this Eventual release (tested: ${expected.join(", ")}). Eventual will run; check the event editor after upgrading and report anything that looks wrong.`);
   }
   return versions;
 }
-export function checkToolchainVersions(resolveVersion = installedVersion) {
+const toolchainMinimum = Object.freeze({ astro: "7.3.2", vite: "8.3.0", react: "19.0.0" });
+const toolchainTested = Object.freeze({ astro: v => /^7.[34]./.test(v), vite: v => /^8.3./.test(v), react: v => /^19./.test(v) });
+export function checkToolchainVersions(resolveVersion = installedVersion, warn = warnOnce) {
   const versions={};
   for (const [name, range] of Object.entries(testedToolchain)) {
     const version=resolveVersion(name);
-    if (!(name === "astro" ? /^7\.[34]\.\d+$/.test(version) && (version.startsWith("7.4.") || Number(version.split(".")[2]) >= 2) : name === "vite" ? /^8\.3\.\d+$/.test(version) : /^19\.\d+\.\d+$/.test(version))) throw new Error(`Eventual editor requires ${name} ${range}; found ${version}. See the editor compatibility matrix.`);
+    if (compareVersions(version, toolchainMinimum[name]) < 0) throw new Error(`Eventual editor requires ${name} ${toolchainMinimum[name]} or newer (tested: ${range}); found ${version}. See the editor compatibility matrix.`);
+    if (!toolchainTested[name](version)) warn(`${name} ${version} is newer than the tested ${range}. Eventual will run; check the event editor after upgrading.`);
     versions[name]=version;
   }
   return versions;

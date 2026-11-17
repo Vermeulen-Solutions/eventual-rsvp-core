@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import {
   patchEmbeddedBlockForms,
   eventualEditorCompatibility,
+  patchOrPassThrough,
 } from "../astro/editor-compat.mjs";
 
 const legacyFixture = `import { useCallback, useEffect, useMemo, useState } from "react";
@@ -151,9 +152,23 @@ test("the installed renderer is patched in either supported shape", () => {
   );
 });
 
-test("unsupported dependency versions fail visibly instead of silently patching unrelated code", () => {
+test("unsupported dependency builds are left untouched with a warning instead of failing the site build", () => {
   assert.throws(
     () => patchEmbeddedBlockForms("different renderer"),
     /Unsupported/,
   );
+  const warnings = [];
+  assert.equal(patchOrPassThrough(patchEmbeddedBlockForms, "different renderer", "form adapter", message => warnings.push(message)), null);
+  assert.equal(warnings.length, 1);
+  assert.match(warnings[0], /form adapter did not match this EmDash build \(Unsupported/);
+  const plugin = eventualEditorCompatibility();
+  plugin.config({}, { command: "build" });
+  const originalWarn = console.warn;
+  const logged = [];
+  console.warn = message => logged.push(message);
+  try {
+    assert.equal(plugin.transform("different admin", "C:/site/node_modules/@emdash-cms/admin/dist/index.js"), null);
+    assert.equal(plugin.transform("different renderer", "C:/site/node_modules/@emdash-cms/blocks/dist/index.js"), null);
+  } finally { console.warn = originalWarn; }
+  assert.equal(logged.length, 2);
 });
