@@ -15,7 +15,10 @@
 		"installation": { "file": "./docs/registry-installation.md" },
 		"changelog": { "file": "./docs/registry-changelog.md" }
 	},
-	"repo": "https://github.com/Vermeulen-Solutions/eventual-rsvp-core",
+	// Keep the repository's former address here. The Registry's package profile is linked to it,
+	// `emdash-plugin publish` refuses a release that names another one ("The package profile is
+	// linked to …"), and no CLI command changes that link. GitHub redirects it to eventual-rsvp-core.
+	"repo": "https://github.com/Vermeulen-Solutions/eventual-emdash-sandbox",
 	"release": {
 		"requires": { "env:emdash": ">=1.2.0 <2.0.0" },
 		"artifacts": {
