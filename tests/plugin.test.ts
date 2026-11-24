@@ -5,6 +5,16 @@ import {
   type PluginTestHost,
 } from "@emdash-cms/plugin-test";
 import plugin from "../src/plugin";
+
+/** UTC instant of a Europe/Paris wall-clock time such as "2026-10-15T18:30". */
+function parisLocalToUtc(local: string): string {
+  const asUtc = new Date(local + ":00Z");
+  const name = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Paris", timeZoneName: "longOffset" })
+    .formatToParts(asUtc).find(part => part.type === "timeZoneName")!.value;
+  const [, sign, hours, minutes] = /GMT([+-])(\d\d):(\d\d)/.exec(name)!;
+  const offset = (sign === "+" ? 1 : -1) * (Number(hours) * 60 + Number(minutes));
+  return new Date(asUtc.getTime() - offset * 60_000).toISOString();
+}
 let host: PluginTestHost | undefined;
 afterEach(async () => {
   await host?.dispose();
@@ -176,8 +186,11 @@ describe("Eventual compatibility routes", { timeout: 60_000 }, () => {
     ).event;
     expect(created).toMatchObject({ ok: true });
     expect(event).toMatchObject({
-      start: "2026-10-15T16:30:00.000Z",
-      end: "2026-10-15T17:30:00.000Z",
+      // Paris local time as UTC. Computed, not written out: the fixture dates of this suite are
+      // moved forward by whole weeks (vitest.config.ts) and can land on either side of the
+      // change to winter time.
+      start: parisLocalToUtc("2026-10-15T18:30"),
+      end: parisLocalToUtc("2026-10-15T19:30"),
       allDay: false,
       published: false,
     });
