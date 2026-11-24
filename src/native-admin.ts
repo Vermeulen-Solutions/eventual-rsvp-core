@@ -15,6 +15,8 @@ export async function handleAdmin(input:unknown,ctx:EventualContext,user?:Sandbo
  if(!schema) return {blocks:[{type:'context',text:'Choose an event collection in Event settings.'}]};
  const link=(path:string,label:string)=>({type:'link' as const,label,target:{kind:'external' as const,url:new URL(path,ctx.site.url).href}});
  const content='/_emdash/admin/content/'+encodeURIComponent(schema.slug);
+ // Registry installs are addressed by a generated ID (r_…), not by the slug.
+ const api='/_emdash/api/plugins/'+encodeURIComponent(ctx.plugin?.id || 'eventual')+'/';
  if(request.page==='widget:upcoming-events') {
   const feed=await handlePublicEvents({},ctx);
   return {blocks:[{type:'header',text:'Upcoming events'},...(feed.events ?? []).slice(0,5).map(event=>({type:'section' as const,block_id:'eventual-verbatim',text:event.title+' · '+event.start}))]};
@@ -42,6 +44,6 @@ export async function handleAdmin(input:unknown,ctx:EventualContext,user?:Sandbo
  if(page.hasMore && (!page.cursor || page.cursor===cursor)) reject('Incomplete event page. Reload the workspace.');
  const pages=[...(cursor?[{type:'button' as const,action_id:'page-native-events-first',label:'First page',value:''}]:[]),...(page.hasMore?[{type:'button' as const,action_id:'page-native-events-next',label:'Next events',value:page.cursor}]:[])];
  if(pages.length) blocks.push({type:'actions',elements:pages});
- blocks.push({type:'header',text:'Subscribe'},{type:'actions',elements:[link('/_emdash/api/plugins/eventual/calendar','Calendar subscription (.ics)'),link('/_emdash/api/plugins/eventual/publicEvents','Published events (JSON)')]});
+ blocks.push({type:'header',text:'Subscribe'},{type:'actions',elements:[link(api+'calendar','Calendar subscription (.ics)'),link(api+'publicEvents','Published events (JSON)')]});
  return {blocks};
 }

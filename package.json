@@ -1,6 +1,6 @@
 {
   "name": "@vermeulen.solutions/eventual",
-  "version": "0.18.4",
+  "version": "0.18.5",
   "license": "MIT",
   "homepage": "https://eventual.rsvp/",
   "type": "module",
@@ -47,7 +47,7 @@
     "src/schema",
     "src/storage.ts",
     "src/public-event.ts",
-    "docs/native-modernization.md",
+    "docs/developer-guide.md",
     "docs/registry-installation.md",
     "scripts/export-native-schema.mjs",
     "scripts/upgrade-native-editor.mjs",
@@ -66,7 +66,8 @@
     "docs/release-notes-0.18.1.md",
     "docs/release-notes-0.18.2.md",
     "docs/release-notes-0.18.3.md",
-    "docs/release-notes-0.18.4.md"
+    "docs/release-notes-0.18.4.md",
+    "docs/release-notes-0.18.5.md"
   ],
   "scripts": {
     "validate": "emdash-plugin validate",

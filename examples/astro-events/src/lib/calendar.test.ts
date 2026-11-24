@@ -124,6 +124,7 @@ describe("Astro event browser calendar", () => {
 	it("turns the iCalendar endpoint into a webcal subscription URL", () => {
 		expect(webcalUrl("/_emdash/api/plugins/eventual/calendar", "https://events.example/events/test-event")).toBe("webcal://events.example/_emdash/api/plugins/eventual/calendar");
 		expect(calendarFeedUrl("https://events.example")).toBe("webcal://events.example/_emdash/api/plugins/eventual/calendar");
+		expect(calendarFeedUrl("https://events.example", "r_hxn32uyal53iahxf")).toBe("webcal://events.example/_emdash/api/plugins/r_hxn32uyal53iahxf/calendar");
 	});
 
 	it("prefills a single Google Calendar event with UTC times or exclusive all-day end", () => {

@@ -24,4 +24,4 @@ Existing 0.13.x native schemas need no migration. Earlier versions require the [
 
 The setting is `legacyReads` in `getSettings`/`updateSettings`; the admin action is `save-legacy-reads`. Stored values enable reads only when strictly boolean `true`, and both save paths invalidate the request memo. The gate covers JSON, calendar reconciliation and subscriptions; disabled legacy images return 404. Administrative inspection, migration and legacy write tools retain their existing permissions.
 
-Acceptance restored French weekday labels and refreshed the settings screenshot. See [using Eventual](user-guide.md), [developer integration](native-modernization.md) and the [release evidence](../audit/releases/0.14.0/README.md).
+Acceptance restored French weekday labels and refreshed the settings screenshot. See [using Eventual](user-guide.md), [developer integration](developer-guide.md) and the [release evidence](../audit/releases/0.14.0/README.md).

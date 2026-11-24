@@ -10,6 +10,7 @@ export default defineConfig({
 	env: {
 		schema: {
 			EVENTUAL_API_ORIGIN: envField.string({ context: "server", access: "secret", optional: true }),
+			EVENTUAL_PLUGIN_ID: envField.string({ context: "server", access: "secret", default: "eventual" }),
 			EVENTUAL_LOCALE: envField.string({ context: "server", access: "secret", default: "en-GB" }),
 			EVENTUAL_DISPLAY_TIMEZONE: envField.string({ context: "server", access: "secret", default: "UTC" }),
 		},

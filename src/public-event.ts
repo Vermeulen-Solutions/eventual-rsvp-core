@@ -82,7 +82,7 @@ export function formatPublicEvent(
 			location,
 			locationType: event.locationType,
 			virtualUrl: event.virtualUrl,
-		}),
+		}, "", pluginId),
 	};
 	return result;
 }

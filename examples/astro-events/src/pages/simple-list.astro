@@ -2,14 +2,14 @@
 import SiteLayout from "../layouts/SiteLayout.astro";
 import EventList from "@vermeulen.solutions/eventual/astro/EventList.astro";
 import { fetchPublicFeed } from "@vermeulen.solutions/eventual/astro";
-import { EVENTUAL_API_ORIGIN, EVENTUAL_LOCALE } from "astro:env/server";
+import { EVENTUAL_API_ORIGIN, EVENTUAL_LOCALE, EVENTUAL_PLUGIN_ID } from "astro:env/server";
 
 const from = new Date().toISOString().slice(0, 10);
 const throughDate = new Date(`${from}T00:00:00Z`);
 throughDate.setUTCDate(throughDate.getUTCDate() + 30);
 const through = throughDate.toISOString().slice(0, 10);
 const apiOrigin = EVENTUAL_API_ORIGIN || Astro.url.origin;
-const { events } = await fetchPublicFeed(apiOrigin, from, through);
+const { events } = await fetchPublicFeed(apiOrigin, from, through, "", { pluginId: EVENTUAL_PLUGIN_ID });
 ---
 
 <SiteLayout title="Upcoming events" locale={EVENTUAL_LOCALE} description="Upcoming events list">

@@ -2,6 +2,15 @@
 
 All notable changes to Eventual RSVP – Core (formerly Eventual) are documented here.
 
+## 0.18.5 - 2026-11-24
+
+- **Registry installs: links now use the installed plugin ID.** A plugin installed from the EmDash Registry is addressed by a generated ID that starts with `r_`, not by `eventual`. Two links still used `eventual` and answered "Plugin route not found" on those sites: the **Subscribe** links on the Eventual RSVP admin page (calendar subscription and JSON feed), and the per-event `.ics` link in the public feed's `calendarLinks`. Both now use the installed ID. Config-managed installs keep `eventual`. ([#7](https://github.com/Vermeulen-Solutions/eventual-rsvp-core/issues/7))
+- **The per-event `.ics` link downloads one event.** The `calendar` route ignored `eventId`, so the link in `calendarLinks.ics` returned the whole year's calendar. It now returns that event only: every upcoming date of a repeating event, or one date when given an occurrence ID (`<id>#<date>`). The entry is chosen by its ID, so the link from a translated page gives that translation. An unknown, unpublished or past event answers 404. The subscription without `eventId` is unchanged.
+- **Helpers:** `buildCalendarLinks(event, siteUrl, pluginId)` takes the plugin ID as an optional third argument (default `eventual`).
+- **Astro showcase:** new optional `EVENTUAL_PLUGIN_ID` setting for the feed requests and the subscription link.
+- **Documentation** ([#8](https://github.com/Vermeulen-Solutions/eventual-rsvp-core/issues/8)): the developer guide is now `docs/developer-guide.md` (the old address points to it). It opens with one section on versions and where to get them, warns against the unrelated npm package `eventual`, explains why a site should have one backend only, and says where to turn on agent tools. The setup guide has the agent-tools steps too. The guide no longer says `fetchPublicFeed` cannot address a Registry install; it has accepted `pluginId` since 0.15.0.
+- No permission or schema changes, and no new MCP tools.
+
 ## 0.18.4 - 2026-11-17
 
 - **npm package: Block Kit is now an optional peer dependency** (`@emdash-cms/blocks >=1.2.0 <2.0.0`) instead of an exact 1.4.0 dependency. Eventual only uses its types, so sites use the Block Kit their EmDash installs. With the exact pin, an EmDash 1.5 site that also uses `@emdash-cms/cloudflare` 1.5.0 could not install the package without an npm or pnpm override.

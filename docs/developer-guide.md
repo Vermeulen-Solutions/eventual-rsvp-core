@@ -1,0 +1,138 @@
+# Developer guide — Eventual RSVP – Core
+
+EmDash collections own content, rich text, languages, drafts, revisions and publication. Eventual's sandbox supplies schedule validation, recurrence, saved-entry controls and feeds. See [setup](collection-setup.md) and [upgrading](upgrade-0.13.0.md).
+
+The [public feed caching guide](public-feed-caching.md) describes additive
+dependency/expiry metadata, direct runtime dispatch and the host's explicit opt-in.
+
+## Versions and where to get them
+
+One version number covers everything. Use the same one in all three places:
+
+| What | Where | Notes |
+| --- | --- | --- |
+| Backend and editor controls | EmDash admin, **Plugins → Registry**: **Eventual RSVP – Core** by **vermeulen.solutions** | The current version is on the Registry page and in the [changelog](../CHANGELOG.md). |
+| Astro, schema and transfer helpers | npm: [`@vermeulen.solutions/eventual`](https://www.npmjs.com/package/@vermeulen.solutions/eventual) | Optional. Not part of the Registry download. |
+| Source | Git tag `v<version>` in this repository | For building from a checkout. |
+
+```sh
+npm install @vermeulen.solutions/eventual
+```
+
+That installs the newest helpers. If the site's Registry backend is older, pin the same version instead, for example `npm install @vermeulen.solutions/eventual@0.18.4`.
+
+**Do not run `npm install eventual`.** The unscoped name `eventual` on npm is an unrelated package by another author. Import the helpers as `@vermeulen.solutions/eventual/astro`, `@vermeulen.solutions/eventual/schema` and so on.
+
+Versions before 0.18.1 were never on npm. Their source archives (`eventual-<version>.tgz`) are attached to the [GitHub releases](https://github.com/Vermeulen-Solutions/eventual-rsvp-core/releases), which stop at 0.16.0. For 0.17.0 and 0.18.0, build from the Git tag.
+
+To build the helpers from a checkout of a tag, run `npm ci`, `npm run build` and `npm pack`.
+
+## Installation and plugin ID
+
+There are two ways to run the backend:
+
+- **Registry install:** installed from the EmDash admin. The host downloads the bundle and runs it in its sandbox. Cloudflare hosts need Worker Loader and PluginBridge: [EmDash sandbox setup](https://docs.emdashcms.com/deployment/plugin-sandbox/).
+- **Config-managed install:** the npm package is listed in `astro.config.mjs` under `sandboxed: [eventual]`.
+
+**The plugin ID differs between the two.** A config-managed install has the ID `eventual`. A Registry install has a generated ID that starts with `r_`, such as `r_hxn32uyal53iahxf`. EmDash derives it from the publisher and the plugin's Registry name, so it is the same on every site and does not change on update.
+
+The ID is part of every route URL (`/_emdash/api/plugins/<pluginId>/…`) and of every MCP tool name (`<pluginId>__<toolName>`). To find it:
+
+- Open **Eventual RSVP** in the admin and look at the **Subscribe** links at the bottom of the page (shown once an event collection is connected): they contain the ID. So does the address of the page itself (`/_emdash/admin/plugins/<pluginId>/events`).
+- Or read it from the install result or authenticated `GET /_emdash/api/admin/plugins`.
+
+Since 0.18.5 every link Eventual builds itself (the admin's Subscribe links and the per-event `.ics` link in the feed) uses the installed ID. Links your own pages build must use it too: pass `pluginId` to `fetchPublicFeed` (see [Astro integration](#astro-integration)).
+
+**Use one backend per site.** Do not install from the Registry and also list the package under `sandboxed`. EmDash treats the two as different plugins, because their IDs differ:
+
+- Each keeps its own settings and storage. Collections connected in one are not connected in the other.
+- Both run their checks when an event is saved, so one save can be handled twice.
+- The admin shows two sets of Eventual pages, and the site has two feeds at two addresses.
+
+To switch from one to the other, remove the first, install the second, and select the collections again under **Event settings**. Events, venues and organizers live in EmDash collections and stay as they are. What the plugin keeps for itself does not carry over: its settings, old events still stored inside the plugin (from before 0.13), and the calendar subscription state (update counters and cancelled dates). The source installer (`emdashWithEventual`) stops the build when it finds the backend listed twice in the config; it cannot see a Registry install.
+
+Source tooling needs Node 24+. Peer ranges are in [package.json](../package.json); release acceptance uses EmDash/Admin/Block Kit **1.2.0 and 1.4.0**, Astro 7.3.x/7.4.x and React 19. The source `@vermeulen.solutions/eventual/install` lane is tested on 1.2.0, 1.4.0 and 1.5.0. It refuses only hosts older than 1.2.0; a newer untested host builds with a warning, and an editor adapter that no longer matches the admin build steps aside (with a warning) so EmDash's own editor is used. Registry installs never execute that transform.
+
+| Host | Status | Notes |
+| --- | --- | --- |
+| 1.2.0 | supported, unit-tested | Panel Enter/validation is scoped to the outer content-editor form; Cloudflare cross-isolate plugin mutations can fail. |
+| 1.3.x | supported, untested | Same form/Cloudflare limitations; includes the plugin-storage cursor fix. |
+| 1.4.x | supported, full acceptance | Recommended. Fixes nested Block Kit forms and Cloudflare plugin mutations. |
+| 1.5.x | supported, host-tested | 1.5.0 passes the native-site and plugin integration suites; the admin adapter recognises its editor panel. |
+| newer | allowed with a warning | Not yet tested. Check the event editor after upgrading. |
+
+## Public routes
+
+Routes are relative to `/_emdash/api/plugins/<pluginId>/`.
+
+| Route | Inputs and behavior |
+| --- | --- |
+| `GET publicEvents` | Inclusive `from`/`through` dates (YYYY-MM-DD); default UTC today through 180 days later; maximum 366 inclusive dates. Also `locale`, `strict` (false), `category`, `publicUrls` (true). |
+| `GET calendar` | Raw text/calendar; fixed window from UTC today through 365 days later. Supports locale, strict and category. |
+| `GET calendar?eventId=…` | The same format for one event: its upcoming dates, or one date with an occurrence ID (`<id>#<date>`, as in the JSON feed). The entry is chosen by its ID, so no `locale` is needed. Same UID as in the subscription. 404 when the event is unknown, unpublished or over. |
+| `GET publicEventImage?eventId=…` | Published featured image with MIME/size checks; absent, unpublished or disabled legacy images return 404. |
+
+`strict=true` omits events without the requested translation; false can use another language with a `[FR]`/`[EN]` title prefix. Categories match without case sensitivity. `publicUrls=false` skips native canonical-URL lookups; slug/id remain available for site-owned links.
+
+JSON success:
+
+```json
+{"success":true,"data":{"ok":true,"from":"2026-11-01","through":"2026-11-30","events":[]}}
+```
+
+The feed has no top-level locale. Event rows carry title, description/plain text, optional descriptionBlocks, start/end, allDay, timezone, location, organizer, externalUrl, imageUrl, categories, venue and directionsUrl. Optional native metadata includes locale, translationGroup, slug and publicUrl. Business status is `status`, not `eventStatus`: see [PublicEvent](../src/public-event.ts). All-day end dates are inclusive here and exclusive in ICS.
+
+Handle both `success:false` host failures and `data.ok:false` plugin failures. EmDash 1.2.0 JSON configuration/RPC failures use HTTP 400, ROUTE_ERROR and private/no-store caching. Preserve errors instead of substituting stale rows or a successful empty feed.
+
+## Astro integration
+
+`fetchPublicFeed(origin, from, through, category, {locale, strict, publicUrls, pluginId})` from `@vermeulen.solutions/eventual/astro` validates responses and throws FeedError. **On a Registry install, pass `pluginId`** (since 0.15.0); without it the helper requests `eventual` and the host answers "Plugin route not found":
+
+```ts
+import { fetchPublicFeed } from '@vermeulen.solutions/eventual/astro';
+
+const pluginId = import.meta.env.EVENTUAL_PLUGIN_ID ?? 'eventual';
+const feed = await fetchPublicFeed(Astro.url.origin, '2026-11-01', '2026-11-30', '', { pluginId, locale: 'fr' });
+```
+
+The [showcase](../examples/astro-events/README.md) reads the same ID from `EVENTUAL_PLUGIN_ID`. To skip the HTTP round trip on the same host, call EmDash's SSR dispatcher with the same ID:
+
+```ts
+const url = new URL(`/_emdash/api/plugins/${pluginId}/publicEvents`, Astro.url);
+url.searchParams.set('from', '2026-11-01');
+url.searchParams.set('through', '2026-11-30');
+url.searchParams.set('locale', 'fr');
+const runtime = Astro.locals.emdash;
+if (!runtime) throw new Error('EmDash is unavailable');
+const result = await runtime.handlePublicPluginApiRoute(
+  pluginId, 'GET', '/publicEvents', new Request(url),
+);
+if (!result.success) throw new Error(result.error?.message ?? 'Event feed unavailable');
+// Validate result.data.ok and result.data.events before rendering.
+```
+
+Each feed event carries `calendarLinks` (Google, Outlook, Office 365 and `.ics`), already built with the installed ID. The `.ics` link downloads that event only (`calendar?eventId=…`); before 0.18.5 it returned the whole calendar. `buildCalendarLinks(event, siteUrl, pluginId)` builds the same links on your side and takes the ID as its third argument.
+
+`@vermeulen.solutions/eventual/astro/EventList.astro` is an optional unstyled list. JSON-LD helpers are eventToJsonLd and serializeJsonLd; use the safe serializer. The [showcase](../examples/astro-events/README.md) supplies seven complete visitor layouts.
+
+## Settings, tools and transfer
+
+Tools `getSettings` and `updateSettings` use `mcp/settings/get` and `mcp/settings/update`. **updateSettings requires defaultTimezone**, even when only changing legacyReads. Read and retain its value first:
+
+```json
+{"defaultTimezone":"Europe/Paris","legacyReads":false}
+```
+
+Optional collections contains `{events,venues,organizers}`. Native timezone defaults belong to the schema. Only stored boolean true enables legacy public reads. Native collections stay authoritative; broken explicit bindings always error. Both MCP and admin `save-legacy-reads` invalidate the request memo.
+
+**Agent tools are off after installation.** To turn them on, open **Plugins** in the EmDash admin, expand the details of **Eventual RSVP – Core** and switch on **Agent access**. Tool names start with the installed plugin ID (`<pluginId>__listEvents`). Eventual tools require plugins:manage; native editing uses core content tools and content:edit_any. Read tools: listEvents, getEvent, listOccurrences, listVenues, listOrganizers. Legacy writes are blocked once native collections are active. [Tool schemas](https://github.com/Vermeulen-Solutions/eventual-rsvp-core/blob/main/src/mcp-schemas.ts) define exact inputs/routes.
+
+exportRecords follows cursors (default 5, maximum 10). Native native-content-v1 exports are inspection records, not full backups or legacy-import input. previewImport/importRecords accept legacy data only: at most 10 rows / 64 KiB, insert absent IDs, and import events as drafts. The [@vermeulen.solutions/eventual/transfer interface](../transfer/index.d.mts) supplies legacy backup/copy/CSV/ICS helpers. CSV needs stable source IDs and explicit-offset timed dates; all-day ends are inclusive. ICS conversion accepts standalone UTC or VALUE=DATE events and rejects unsupported recurrence/timezone constructs. Media, settings, revisions and calendar-state recovery need the host's backup facilities.
+
+## Limits and checks
+
+The host's ten-bridge-call budget can constrain feeds, dependency checks and migration even with few displayed events. Smaller date windows or publicUrls=false help some JSON requests; complete-source scans still cost calls. Native exceptions/occurrence copy are bounded at 500 items; calendar group/state/output bounds also apply and fail explicitly. Background migration jobs and bulk APIs remain pending: [Eventual #5](https://github.com/Vermeulen-Solutions/eventual-rsvp-core/issues/5), [EmDash #4004](https://github.com/emdash-cms/emdash/issues/4004).
+
+Calendar UIDs, monotonic SEQUENCE and 366-day cancellation retention support reconciliation. Preserve migrated calendar_uid values. Publication shares schedule fields across languages; pending drafts stay separate. Stale-form checks are not an atomic write lock. Some settings copy remains English in the French admin; stock development-renderer diagnostics are recorded in acceptance.
+
+Runtime checks: npm run validate, typecheck, build, bundle, budget, and npm test. Tooling/package/editor/media changes have test:tooling, test:package, test:editor and registry:media checks. `node scripts/audit-documentation.mjs` checks local links and Registry section caps. Publishing uses the pinned CLI; immutable releases and current profile/release CIDs need separate approvals. [Release evidence](../audit/releases/0.14.0/README.md).

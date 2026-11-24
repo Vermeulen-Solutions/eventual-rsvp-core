@@ -6,7 +6,7 @@ import { eventRange } from "../../lib/event-range";
 import { descriptionExcerpt } from "../../lib/markdown";
 import { messagesForLocale } from "../../lib/messages";
 import EventDescription from "../../components/EventDescription.astro";
-import { EVENTUAL_API_ORIGIN, EVENTUAL_LOCALE } from "astro:env/server";
+import { EVENTUAL_API_ORIGIN, EVENTUAL_LOCALE, EVENTUAL_PLUGIN_ID } from "astro:env/server";
 
 const locale = normalizeLocale(EVENTUAL_LOCALE);
 const labels = messagesForLocale(locale);
@@ -18,7 +18,7 @@ let feedError = false;
 
 if (range) {
 	try {
-		event = (await fetchPublicFeed(apiOrigin, range.from, range.through)).events.find((item) => item.id === eventId);
+		event = (await fetchPublicFeed(apiOrigin, range.from, range.through, "", { pluginId: EVENTUAL_PLUGIN_ID })).events.find((item) => item.id === eventId);
 	} catch {
 		feedError = true;
 	}
@@ -31,7 +31,7 @@ const calendarUrl = event ? eventDetailsUrl(event, "/events", ".ics") : "";
 const googleUrl = event ? googleCalendarUrl(event) : "";
 const outlookUrl = event ? outlookCalendarUrl(event) : "";
 const yahooUrl = event ? yahooCalendarUrl(event) : "";
-const subscriptionUrl = calendarFeedUrl(apiOrigin);
+const subscriptionUrl = calendarFeedUrl(apiOrigin, EVENTUAL_PLUGIN_ID);
 const eventImageUrl = event ? safeImageUrl(event.imageUrl, apiOrigin) : "";
 const eventWebsite = event ? safeHttpUrl(event.externalUrl) : "";
 const eventDirections = event ? safeHttpUrl(event.directionsUrl) : "";

@@ -23,8 +23,10 @@ export interface CalendarEventInput {
 /**
  * Builds standard 1-click web calendar links for Google Calendar, Outlook Web,
  * Office 365, and Apple/desktop iCal (.ics) download.
+ * Pass the installed plugin ID: Registry installs are addressed as `r_…`, not `eventual`.
+ * The `.ics` link downloads this event (all upcoming dates of a repeating one) from the `calendar` route.
  */
-export function buildCalendarLinks(event: CalendarEventInput, siteUrl = ""): CalendarLinks {
+export function buildCalendarLinks(event: CalendarEventInput, siteUrl = "", pluginId = "eventual"): CalendarLinks {
 	const title = event.title || "Event";
 	const onlineUrl = safeHttpUrl(event.virtualUrl ?? "");
 	const details = [event.description || "", onlineUrl].filter(Boolean).join("\n\n");
@@ -68,7 +70,7 @@ export function buildCalendarLinks(event: CalendarEventInput, siteUrl = ""): Cal
 	const office365 = `https://outlook.office.com/calendar/0/deeplink/compose?${q}`;
 
 	const eventBaseId = event.id.split("#")[0]!;
-	const icsPath = `/_emdash/api/plugins/eventual/calendar?eventId=${enc(eventBaseId)}`;
+	const icsPath = `/_emdash/api/plugins/${enc(pluginId)}/calendar?eventId=${enc(eventBaseId)}`;
 	const ics = siteUrl ? new URL(icsPath, siteUrl).href : icsPath;
 
 	return {

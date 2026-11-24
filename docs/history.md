@@ -1,6 +1,6 @@
 # History and release evidence
 
-Current instructions are [using Eventual](user-guide.md), [setup](collection-setup.md), [upgrading](upgrade-0.13.0.md) and the [developer guide](native-modernization.md). [CHANGELOG](../CHANGELOG.md) summarizes earlier versions.
+Current instructions are [using Eventual](user-guide.md), [setup](collection-setup.md), [upgrading](upgrade-0.13.0.md) and the [developer guide](developer-guide.md). [CHANGELOG](../CHANGELOG.md) summarizes earlier versions.
 
 The [0.14.1 acceptance record](../audit/releases/0.14.1/README.md) covers the EmDash 1.2.0/1.4.0 compatibility release, the local test-site native gate, and the packed-consumer editor acceptance. It is not a publication record.
 

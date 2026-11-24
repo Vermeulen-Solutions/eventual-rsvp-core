@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { eventIdFromRoute, formatICalendar } from "../../lib/calendar";
 import { eventRange } from "../../lib/event-range";
 import { fetchPublicFeed } from "../../lib/feed";
-import { EVENTUAL_API_ORIGIN } from "astro:env/server";
+import { EVENTUAL_API_ORIGIN, EVENTUAL_PLUGIN_ID } from "astro:env/server";
 
 export const GET: APIRoute = async ({ params, url }) => {
 	const range = eventRange(url.searchParams);
@@ -11,7 +11,7 @@ export const GET: APIRoute = async ({ params, url }) => {
 	try {
 		const apiOrigin = EVENTUAL_API_ORIGIN || url.origin;
 		const eventId = eventIdFromRoute(params.id);
-		const event = (await fetchPublicFeed(apiOrigin, range.from, range.through)).events
+		const event = (await fetchPublicFeed(apiOrigin, range.from, range.through, "", { pluginId: EVENTUAL_PLUGIN_ID })).events
 			.find((item) => item.id === eventId);
 		if (!event) return new Response("Event not found.", { status: 404 });
 

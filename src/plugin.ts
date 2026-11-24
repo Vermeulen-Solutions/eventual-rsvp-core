@@ -7,7 +7,7 @@ import { withInvocationBudget } from "./domain/invocation-budget";
 import type { EventualContext } from "./storage";
 import { handleSavedSchedulePanel } from './native/saved-panel';
 import { handlePublicEvents } from "./routes/public-events";
-import { handlePublicEventImage } from "./routes/public-media";
+import { handlePublicEventImage, textResponse as plain } from "./routes/public-media";
 import { handleCalendarFeed } from "./routes/calendar-feed";
 import { mcpTools } from "./mcp-schemas";
 import { mcpRoutes } from "./mcp";
@@ -16,7 +16,7 @@ import { EventScanLimitError } from "./storage";
 import { handleContentBeforeSave, handleContentBeforeDelete, handleContentBeforePublish, handleContentBeforeUnpublish } from "./hooks/content-hooks";
 import { SandboxBudgetError } from './domain/invocation-budget';
 
-const unavailable = (error: Error) => pluginResponse({status: 503, headers: {'content-type':'text/plain; charset=utf-8', 'cache-control':'no-store', 'retry-after':'60'}, body:{kind:'text',value:error.message}});
+const unavailable = (error: Error) => plain(503, error.message, {'retry-after':'60'});
 
 /** Localize after the handler, with whatever RPC budget the handler left (shared counter). */
 async function localized<T extends Parameters<typeof localizeResponse>[0]>(ctx: EventualContext, locale: string | undefined, render: (ctx: EventualContext) => Promise<T>) {
@@ -80,18 +80,20 @@ const plugin: SandboxedPlugin = {
 					const url = new URL(routeCtx.request.url, "http://localhost");
 					const locale = url.searchParams.get("locale") || undefined;
 					try { if (locale) Intl.getCanonicalLocales(locale); } catch {
-						return pluginResponse({status:400,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store'},body:{kind:'text',value:'Invalid locale.'}});
+						return plain(400, 'Invalid locale.');
 					}
 					const strict = url.searchParams.get("strict") === "true";
 					const category = url.searchParams.get("category") || undefined;
+					// One event (`id`) or one of its dates (`id#date`): the per-event link in the public feed.
+					const eventId = url.searchParams.get("eventId")?.trim() || undefined;
 					const host = url.host || "localhost";
+					const value = await handleCalendarFeed(ctx, host, { locale, strict, category, eventId });
+					// Empty only for a single event that is unknown, unpublished or over.
+					if (!value) return plain(404, 'This event has ended or is no longer published.');
 					return pluginResponse({
 						status: 200,
 						headers: { "content-type": "text/calendar; charset=utf-8" },
-						body: {
-							kind: "text",
-							value: await handleCalendarFeed(ctx, host, { locale, strict, category }),
-						},
+						body: { kind: "text", value },
 					});
 				} catch (error) {
 					return unavailable(error instanceof EventScanLimitError || error instanceof SandboxBudgetError ? error : new Error('Calendar feed unavailable; retry later.'));

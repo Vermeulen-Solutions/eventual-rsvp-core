@@ -20,7 +20,7 @@ import { messagesForLocale } from "../lib/messages";
 import EventAgendaItem from "../components/EventAgendaItem.astro";
 import EventCard from "../components/EventCard.astro";
 import SiteLayout from "../layouts/SiteLayout.astro";
-import { EVENTUAL_API_ORIGIN, EVENTUAL_DISPLAY_TIMEZONE, EVENTUAL_LOCALE } from "astro:env/server";
+import { EVENTUAL_API_ORIGIN, EVENTUAL_DISPLAY_TIMEZONE, EVENTUAL_LOCALE, EVENTUAL_PLUGIN_ID } from "astro:env/server";
 
 const locale = normalizeLocale(EVENTUAL_LOCALE);
 const timeZone = normalizeTimeZone(EVENTUAL_DISPLAY_TIMEZONE);
@@ -40,7 +40,7 @@ const apiOrigin = EVENTUAL_API_ORIGIN || Astro.url.origin;
 let feedEvents: PublicEvent[] = [];
 let feedError = false;
 try {
-	const feed = await fetchPublicFeed(apiOrigin, requestRange.from, requestRange.through, category);
+	const feed = await fetchPublicFeed(apiOrigin, requestRange.from, requestRange.through, category, { pluginId: EVENTUAL_PLUGIN_ID });
 	feedEvents = feed.events;
 } catch {
 	feedError = true;

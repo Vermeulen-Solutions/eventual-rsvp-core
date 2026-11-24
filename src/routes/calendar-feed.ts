@@ -21,6 +21,11 @@ export interface CalendarFeedOptions {
   strict?: boolean;
   category?: string;
   calendarName?: string;
+  /**
+   * One event (`id`) or one of its dates (`id#date`) instead of the whole calendar.
+   * The result is "" when that event is unknown, unpublished or over (a real calendar is never empty text).
+   */
+  eventId?: string;
 }
 export const filterAndDeduplicateEvents = (
   events: import("../domain/event").EventRecord[],
@@ -43,12 +48,19 @@ export async function handleCalendarFeed(
   const state = source.native
     ? await reconcileNativeCalendar(ctx)
     : { events: source.events, cancellations: [] };
+  const eventId = options?.eventId;
+  const baseId = eventId?.split("#")[0];
+  // A single-event download names its entry, so pick it by ID before choosing a language:
+  // the link on a translated page must not resolve to another translation or to nothing.
   const selected = selectEventLocales(
-    state.events,
+    baseId ? state.events.filter((event) => event.id === baseId) : state.events,
     options?.locale,
     options?.strict,
   );
-  const expanded = expandEventsInDateRange(selected, from, through);
+  const inWindow = expandEventsInDateRange(selected, from, through);
+  const expanded = eventId?.includes("#")
+    ? inWindow.filter((event) => event.id === eventId)
+    : inWindow;
   if (expanded.length > 10000)
     reject("Too many calendar occurrences.");
   const category = options?.category ? categoryKey(options.category) : "";
@@ -57,6 +69,7 @@ export async function handleCalendarFeed(
         event.categories.some((value) => categoryKey(value) === category),
       )
     : expanded;
+  if (eventId && !occurrences.length) return "";
   const venues =
     ("venues" in state && state.venues) ||
     (await resolveEventVenues(ctx, occurrences, source.schema));
@@ -66,10 +79,11 @@ export async function handleCalendarFeed(
     ...event,
     location: eventRecordToPublicEvent(event, venues).location,
   }));
-  const legacy = ctx.storage?.calendar_cancellations
+  // Cancellations keep subscriptions in step. A one-off download of one event has no use for them.
+  const legacy = !eventId && ctx.storage?.calendar_cancellations
     ? await listCalendarCancellations(ctx)
     : [];
-  const cancellations = [...state.cancellations, ...legacy].filter(
+  const cancellations = eventId ? [] : [...state.cancellations, ...legacy].filter(
     (item) =>
       Date.parse(item.cancelledAt) > Date.now() - 366 * 86400000 &&
       (!category ||

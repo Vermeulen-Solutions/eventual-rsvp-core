@@ -10,10 +10,11 @@ import { legacyReadsEnabled } from "../domain/collections";
 import { nativeEntryToEventRecord } from "../domain/event-expansion";
 import { withInvocationBudget } from '../domain/invocation-budget';
 
-const textResponse = (status: number, value: string) =>
+/** Every plain-text answer of the plugin's raw routes, never cached. One copy: the Registry caps the bundle at 128 KiB. */
+export const textResponse = (status: number, value: string, headers: Record<string, string> = {}) =>
   pluginResponse({
     status,
-    headers: { "content-type": "text/plain; charset=utf-8" },
+    headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store", ...headers },
     body: { kind: "text", value },
   });
 const notFound = () => textResponse(404, "Not found");

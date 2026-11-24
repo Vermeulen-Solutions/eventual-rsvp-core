@@ -161,9 +161,10 @@ export function webcalUrl(path: string, siteUrl: string | URL): string {
 	return url.href.replace(/^[a-z][a-z0-9+.-]*:/i, "webcal:");
 }
 
-export function calendarFeedUrl(siteUrl: string | URL): string {
+/** Registry installs are addressed by a generated ID (`r_…`); pass it as `pluginId`. */
+export function calendarFeedUrl(siteUrl: string | URL, pluginId = "eventual"): string {
 	try {
-		return webcalUrl("/_emdash/api/plugins/eventual/calendar", siteUrl);
+		return webcalUrl(`/_emdash/api/plugins/${encodeURIComponent(pluginId)}/calendar`, siteUrl);
 	} catch {
 		return "";
 	}

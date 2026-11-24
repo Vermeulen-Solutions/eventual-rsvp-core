@@ -30,13 +30,15 @@ In PowerShell, use `Copy-Item .env.example .env`. Edit the environment values:
 EVENTUAL_API_ORIGIN=http://127.0.0.1:4322
 EVENTUAL_LOCALE=fr
 EVENTUAL_DISPLAY_TIMEZONE=Europe/Paris
+# Only for a Registry install:
+EVENTUAL_PLUGIN_ID=r_xxxxxxxxxxxxxxxx
 ```
 
 Open the URL Astro prints; its default port is 4321 and `/` redirects to `/events`.
 
 ## Integration assumptions
 
-The feed helper and subscription links currently use plugin ID **eventual**. Registry installations have generated IDs and need an adapter: see the [developer guide](../../docs/native-modernization.md#astro-integration). A remote API origin must be reachable by the SSR server; subscription links must also be reachable by visitors' calendar apps.
+The feed requests and the subscription link use plugin ID **eventual** unless `EVENTUAL_PLUGIN_ID` is set. A Registry install has a generated ID that starts with `r_`; copy it from the **Subscribe** links on the Eventual RSVP admin page. See the [developer guide](../../docs/developer-guide.md#installation-and-plugin-id). A remote API origin must be reachable by the SSR server; subscription links must also be reachable by visitors' calendar apps.
 
 EVENTUAL_LOCALE controls interface labels, date formatting and week layout (English, Dutch and French labels). The current example requests do **not** pass locale/strict to the feed. To select translated event content, add those options to each fetchPublicFeed call. Display time zone does not rewrite stored event schedules.
 
