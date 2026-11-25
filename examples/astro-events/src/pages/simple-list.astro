@@ -12,10 +12,7 @@ const apiOrigin = EVENTUAL_API_ORIGIN || Astro.url.origin;
 const { events } = await fetchPublicFeed(apiOrigin, from, through, "", { pluginId: EVENTUAL_PLUGIN_ID });
 ---
 
-<SiteLayout title="Upcoming events" locale={EVENTUAL_LOCALE} description="Upcoming events list">
-  <main class="event-browser" id="main-content" tabindex="-1">
-    <h1>Upcoming events</h1>
-    <EventList events={events} />
-  </main>
+<SiteLayout title="Upcoming events" lang={EVENTUAL_LOCALE} description="Upcoming events list">
+	<h1>Upcoming events</h1>
+	<EventList events={events} locale={EVENTUAL_LOCALE} />
 </SiteLayout>
-

@@ -1,101 +1,20 @@
 ---
+import EventDetail from "@vermeulen.solutions/eventual/astro/EventDetail.astro";
+import { loadEventDetail } from "@vermeulen.solutions/eventual/astro/events";
 import SiteLayout from "../../layouts/SiteLayout.astro";
-import { calendarFeedUrl, displayDate, eventDetailsUrl, eventEndDate, eventIdFromRoute, eventStartDate, eventTimeRange, googleCalendarUrl, normalizeLocale, outlookCalendarUrl, safeHttpUrl, safeImageUrl, yahooCalendarUrl } from "../../lib/calendar";
-import { fetchPublicFeed, eventToJsonLd, serializeJsonLd, type PublicEvent } from "../../lib/feed";
-import { eventRange } from "../../lib/event-range";
-import { descriptionExcerpt } from "../../lib/markdown";
-import { messagesForLocale } from "../../lib/messages";
-import EventDescription from "../../components/EventDescription.astro";
 import { EVENTUAL_API_ORIGIN, EVENTUAL_LOCALE, EVENTUAL_PLUGIN_ID } from "astro:env/server";
 
-const locale = normalizeLocale(EVENTUAL_LOCALE);
-const labels = messagesForLocale(locale);
-const eventId = eventIdFromRoute(Astro.params.id);
-const apiOrigin = EVENTUAL_API_ORIGIN || Astro.url.origin;
-const range = eventRange(Astro.url.searchParams);
-let event: PublicEvent | undefined;
-let feedError = false;
-
-if (range) {
-	try {
-		event = (await fetchPublicFeed(apiOrigin, range.from, range.through, "", { pluginId: EVENTUAL_PLUGIN_ID })).events.find((item) => item.id === eventId);
-	} catch {
-		feedError = true;
-	}
-}
-Astro.response.status = feedError ? 502 : event ? 200 : 404;
-
-const title = event?.title ?? labels.eventDetails;
-const eventDescription = event?.description ? descriptionExcerpt(event.description) : undefined;
-const calendarUrl = event ? eventDetailsUrl(event, "/events", ".ics") : "";
-const googleUrl = event ? googleCalendarUrl(event) : "";
-const outlookUrl = event ? outlookCalendarUrl(event) : "";
-const yahooUrl = event ? yahooCalendarUrl(event) : "";
-const subscriptionUrl = calendarFeedUrl(apiOrigin, EVENTUAL_PLUGIN_ID);
-const eventImageUrl = event ? safeImageUrl(event.imageUrl, apiOrigin) : "";
-const eventWebsite = event ? safeHttpUrl(event.externalUrl) : "";
-const eventDirections = event ? safeHttpUrl(event.directionsUrl) : "";
-const eventVirtualUrl = event ? safeHttpUrl(event.virtualUrl ?? "") : "";
-const eventSameDay = event ? eventStartDate(event) === eventEndDate(event) : true;
+const data = await loadEventDetail(Astro.url, Astro.params.id, {
+	pluginId: EVENTUAL_PLUGIN_ID,
+	origin: EVENTUAL_API_ORIGIN || Astro.url.origin,
+	locale: EVENTUAL_LOCALE,
+	basePath: "/events",
+});
+Astro.response.status = data.status;
 ---
 
-<SiteLayout title={`${title} · ${labels.title}`} locale={locale} description={eventDescription}>
-	{event && (
-		<script slot="head" type="application/ld+json" set:html={serializeJsonLd(eventToJsonLd(event, { siteUrl: apiOrigin }))} />
-	)}
-	<main class="event-browser event-detail" id="main-content" tabindex="-1">
-		<p><a class="back-link" href="/events">← {labels.backToEvents}</a></p>
-		{feedError ? (
-			<section class="notice notice--error" role="status">
-				<h1>{labels.feedUnavailable}</h1>
-				<p>{labels.feedErrorDetail}</p>
-			</section>
-		) : event ? (
-			<>
-				{event.status && !["published", "draft"].includes(event.status) && (
-					<p class="notice notice--alert"><strong>{labels.status}:</strong> {labels.eventStatuses[event.status]}</p>
-				)}
-				<h1>{event.title}</h1>
-				<ul class="event-actions">
-					<li>
-						<details class="calendar-menu">
-							<summary class="button-link">
-								<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 4.5h13v15H3zM6 8h7M6 11h7M6 14h5M18 8l3 4-3 4M16 12h5" /></svg>
-								<span>{labels.addToCalendar}</span>
-								<svg class="calendar-menu__chevron" aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 6 5 5 5-5" /></svg>
-							</summary>
-							<div class="calendar-menu__options">
-								<a href={googleUrl} target="_blank" rel="noopener noreferrer">{labels.googleCalendar}</a>
-								<a href={outlookUrl} target="_blank" rel="noopener noreferrer">{labels.outlookCalendar}</a>
-								<a href={yahooUrl} target="_blank" rel="noopener noreferrer">{labels.yahooCalendar}</a>
-								<a href={calendarUrl}>{labels.iCalendar}</a>
-							</div>
-						</details>
-					</li>
-					<li><a class="button-link button-link--secondary" href={subscriptionUrl}>{labels.subscribeCalendar}</a></li>
-					{eventWebsite && <li><a href={eventWebsite} target="_blank" rel="noopener noreferrer">{labels.externalWebsite}</a></li>}
-				</ul>
-				<article class="event-detail-card">
-					<div class="event-detail-card__meta">
-						<p class="event-card__date">
-							<time datetime={event.start}>{displayDate(event.start, locale, event.timezone, event.allDay)}</time>
-							{!eventSameDay && <> – <time datetime={event.end}>{displayDate(event.end, locale, event.timezone, event.allDay)}</time></>}
-							{event.allDay ? ` · ${labels.allDay}` : ` · ${eventTimeRange(event, locale)} · ${event.timezone}`}
-						</p>
-						{event.organizer && <p class="event-card__organizer">{labels.organizer} {event.organizer}</p>}
-						{event.location && <p class="event-card__location">{event.location}{eventDirections && <> · <a href={eventDirections} target="_blank" rel="noopener noreferrer">{labels.directions}</a></>}</p>}
-						{eventVirtualUrl && <p class="event-card__virtual"><a href={eventVirtualUrl} target="_blank" rel="noopener noreferrer">{labels.joinOnline} ↗</a></p>}
-					</div>
-					{eventImageUrl && <img class="event-card__image" src={eventImageUrl} alt="" decoding="async" />}
-					{event.description && <EventDescription source={event.description} />}
-					{event.categories.length > 0 && <ul class="event-card__categories" aria-label={labels.categories}>{event.categories.map((category) => <li>{category}</li>)}</ul>}
-				</article>
-			</>
-		) : (
-			<section class="notice notice--empty" role="status">
-				<h1>{labels.eventDetails}</h1>
-				<p>{labels.eventNotFound}</p>
-			</section>
-		)}
-	</main>
+<SiteLayout title={data.pageTitle} lang={data.lang} dir={data.dir} description={data.description}>
+	<EventDetail data={data}>
+		{/* RsvpForm or TicketCheckout go here: see the developer guide. */}
+	</EventDetail>
 </SiteLayout>

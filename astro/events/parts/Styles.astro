@@ -259,8 +259,13 @@
 
 	.eventual-views a[aria-current="page"] {
 		background: var(--_accent);
-		color: var(--_on-accent);
 		font-weight: 600;
+	}
+
+	/* On an inner span: a site's own `a { color }` rule is unlayered, so it beats this layer and
+	   would paint the current tab's label in the tab's own colour. */
+	.eventual-views a[aria-current="page"] > span {
+		color: var(--_on-accent);
 	}
 
 	.eventual-toolbar {
@@ -1433,6 +1438,10 @@
 			border: 1px solid ButtonText;
 			forced-color-adjust: none;
 			background: Highlight;
+			color: HighlightText;
+		}
+
+		.eventual-views a[aria-current="page"] > span {
 			color: HighlightText;
 		}
 

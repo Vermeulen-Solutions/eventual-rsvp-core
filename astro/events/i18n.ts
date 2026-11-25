@@ -1,13 +1,12 @@
 import { bindMessages, localeDirection, resolveLocale, type Bound } from "@vermeulen.solutions/eventual-locales";
 
 /**
- * Every visible string of the event pages (EventBrowser, EventDetail) and EventList. English is
+ * Every visible string of the event pages (EventBrowser, EventDetail). English is
  * the source; other languages ship in @vermeulen.solutions/eventual-locales
  * (catalogs/core-site/<lang>.json, flat dotted keys over this tree). Leaves written as
  * ["template", "arg", …] become functions; templates use ICU syntax ({count, plural, …}).
  */
 const en = {
-	title: "Events",
 	pageTitle: ["Events – {month}", "month"],
 	intro: "Browse the month in the format that suits you.",
 	views: {
@@ -26,7 +25,6 @@ const en = {
 		next: ["Next month: {month}", "month"],
 		current: "This month",
 		events: ["Events in {month}", "month"],
-		today: "Today",
 	},
 	filter: {
 		label: "Category",
@@ -53,7 +51,6 @@ const en = {
 		joinOnline: "Join online",
 		categories: "Categories",
 		locationToConfirm: "Location to be confirmed",
-		eventsAt: ["Events at {location}", "location"],
 		originally: ["Originally {date}", "date"],
 		back: "Back to events",
 	},
@@ -75,9 +72,6 @@ const en = {
 		jump: "Jump to a date",
 	},
 	newTab: "(opens in a new tab)",
-	list: {
-		empty: "No events found.",
-	},
 } as const;
 
 /** English source; its dotted paths are the keys of the core-site catalogs. */
@@ -85,8 +79,29 @@ export const EVENT_PAGES_EN = en;
 
 export type EventPageText = Bound<typeof en>;
 
-// Catalogs are added with the eventual-locales release that carries the core-site namespace.
-const catalogs: Record<string, () => Promise<{ default: Record<string, string> }>> = {};
+// Each import becomes its own chunk, loaded per language.
+const catalogs: Record<string, () => Promise<{ default: Record<string, string> }>> = {
+	fr: () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/fr.json", { with: { type: "json" } }),
+	de: () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/de.json", { with: { type: "json" } }),
+	nl: () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/nl.json", { with: { type: "json" } }),
+	es: () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/es.json", { with: { type: "json" } }),
+	it: () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/it.json", { with: { type: "json" } }),
+	pt: () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/pt.json", { with: { type: "json" } }),
+	"pt-BR": () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/pt-BR.json", { with: { type: "json" } }),
+	pl: () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/pl.json", { with: { type: "json" } }),
+	cs: () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/cs.json", { with: { type: "json" } }),
+	sv: () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/sv.json", { with: { type: "json" } }),
+	da: () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/da.json", { with: { type: "json" } }),
+	nb: () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/nb.json", { with: { type: "json" } }),
+	fi: () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/fi.json", { with: { type: "json" } }),
+	ja: () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/ja.json", { with: { type: "json" } }),
+	"zh-CN": () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/zh-CN.json", { with: { type: "json" } }),
+	ko: () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/ko.json", { with: { type: "json" } }),
+	tr: () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/tr.json", { with: { type: "json" } }),
+	uk: () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/uk.json", { with: { type: "json" } }),
+	ar: () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/ar.json", { with: { type: "json" } }),
+	he: () => import("@vermeulen.solutions/eventual-locales/catalogs/core-site/he.json", { with: { type: "json" } }),
+};
 
 /** The page texts in a language (English when there is no catalog), and its writing direction. */
 export async function eventPageText(locale: string | undefined): Promise<{ text: EventPageText; lang: string; dir: "ltr" | "rtl" }> {

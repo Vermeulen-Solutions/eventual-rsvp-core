@@ -248,6 +248,17 @@ export async function loadEventDetail(url: URL, id: string | undefined, options:
 	}
 }
 
+/** The content entry behind a feed event (a recurring date's ID ends in `#<date>`): the `eventId` for RsvpForm and TicketCheckout. */
+export function eventContentId(event: PublicEvent): string {
+	return event.id.split("#")[0] ?? event.id;
+}
+
+/** The event's start as an ISO instant: the `occurrenceStart` for RsvpForm and TicketCheckout. */
+export function occurrenceStart(event: PublicEvent): string {
+	const time = Date.parse(event.start);
+	return Number.isNaN(time) ? "" : new Date(time).toISOString();
+}
+
 /** Finds the event by ID, slug or series ID, preferring the date the address names. */
 export function findEvent(events: PublicEvent[], param: string, from?: string): PublicEvent | undefined {
 	if (!param) return undefined;

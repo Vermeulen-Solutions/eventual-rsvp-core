@@ -128,7 +128,81 @@ if (!result.success) throw new Error(result.error?.message ?? 'Event feed unavai
 
 Each feed event carries `calendarLinks` (Google, Outlook, Office 365 and `.ics`), already built with the installed ID. The `.ics` link downloads that event only (`calendar?eventId=…`); before 0.18.5 it returned the whole calendar. `buildCalendarLinks(event, siteUrl, pluginId)` builds the same links on your side and takes the ID as its third argument.
 
-`@vermeulen.solutions/eventual/astro/EventList.astro` is an optional plain list (title, status, date, venue and, with `showCalendarLinks`, calendar buttons). Since 0.18.7 it has light default styles in the `eventual` cascade layer, so your own CSS always wins: neutral colours follow the surrounding text colour, and the link and status colours follow the page's `color-scheme` (set `color-scheme: dark` where it sits on a dark surface). Adjust them with `--eventual-list-accent`, `--eventual-list-muted`, `--eventual-list-border`, `--eventual-list-radius`, `--eventual-list-cancelled` and `--eventual-list-rescheduled`. JSON-LD helpers are eventToJsonLd and serializeJsonLd; use the safe serializer. The [showcase](../examples/astro-events/README.md) supplies seven complete visitor layouts.
+`@vermeulen.solutions/eventual/astro/EventList.astro` is an optional plain list (title, status, date, venue and, with `showCalendarLinks`, calendar buttons). Since 0.18.7 it has light default styles in the `eventual` cascade layer, so your own CSS always wins: neutral colours follow the surrounding text colour, and the link and status colours follow the page's `color-scheme` (set `color-scheme: dark` where it sits on a dark surface). Adjust them with `--eventual-list-accent`, `--eventual-list-muted`, `--eventual-list-border`, `--eventual-list-radius`, `--eventual-list-cancelled` and `--eventual-list-rescheduled`. JSON-LD helpers are eventToJsonLd and serializeJsonLd; use the safe serializer. For full events pages, use the components below.
+
+## Event pages
+
+Since 0.19.0 the package has two complete page bodies: `EventBrowser` (the events page, with seven views) and `EventDetail` (one event). A loader fetches the feed and returns everything a page needs, including the HTTP status; you render the component inside your own layout. They are site code: nothing here counts towards the plugin's sandbox size.
+
+`src/pages/events.astro`:
+
+```astro
+---
+import EventBrowser from "@vermeulen.solutions/eventual/astro/EventBrowser.astro";
+import { loadEventBrowser } from "@vermeulen.solutions/eventual/astro/events";
+import Layout from "../layouts/Layout.astro";
+
+export const prerender = false;
+const data = await loadEventBrowser(Astro.url, { pluginId: "eventual", locale: "fr-CH", timeZone: "Europe/Zurich" });
+Astro.response.status = data.status;
+---
+<Layout title={data.pageTitle}><EventBrowser data={data} /></Layout>
+```
+
+`src/pages/events/[id].astro`:
+
+```astro
+---
+import EventDetail from "@vermeulen.solutions/eventual/astro/EventDetail.astro";
+import { eventContentId, loadEventDetail, occurrenceStart } from "@vermeulen.solutions/eventual/astro/events";
+import RsvpForm from "@vermeulen.solutions/eventual-attendance/astro/RsvpForm.astro";
+import Layout from "../../layouts/Layout.astro";
+
+export const prerender = false;
+const data = await loadEventDetail(Astro.url, Astro.params.id, { pluginId: "eventual", locale: "fr-CH" });
+Astro.response.status = data.status;
+---
+<Layout title={data.pageTitle}>
+  <EventDetail data={data}>
+    {data.event && <RsvpForm eventId={eventContentId(data.event)} occurrenceStart={occurrenceStart(data.event)} />}
+  </EventDetail>
+</Layout>
+```
+
+Anything inside `EventDetail` (Registrations' `RsvpForm`, Tickets' `TicketCheckout`) appears after the description. On a static site keep `prerender = false` on both pages, since they read the month and the view from the address.
+
+**Loader options** (both loaders):
+
+| Option | Default | What it does |
+|---|---|---|
+| `pluginId` | `eventual` | The installed ID; `r_…` for a Registry install ([how to find it](#installation-and-plugin-id)). |
+| `origin` | the page's own | The EmDash site that serves the feed, when the pages run elsewhere. |
+| `locale` | `en` | Page texts (21 languages), date formats, first day of the week, and the content language asked from the feed. Arabic and Hebrew pages are right to left. |
+| `contentLocale`, `strict` | language of `locale`, `false` | The feed's content language, and whether to leave out events not translated into it. |
+| `timeZone` | `UTC` | The zone for "this month" and "today". Each event keeps its own zone. |
+| `basePath` | `/events` | The events page's address; detail links are `<basePath>/<slug>`. |
+| `linkTo` | `detail` | `cms` links to the entry's own public page when it has one. |
+| `views`, `defaultView` | all seven, `list` | The views offered, in order: `list`, `timeline`, `cards`, `schedule`, `dates`, `month`, `locations`. |
+| `view`, `month`, `category` | from the address | Fix a value instead of reading `?view=`, `?month=` or `?category=`. |
+
+**Component props:** `EventBrowser` takes `headingLevel` (1, or 2 inside another page), `title`, `intro` (`false` for none), `id`, `showFilter`, `showViewSwitch` and `scheme`. `EventDetail` takes `headingLevel`, `backHref` (`false` for none), `showSubscribe`, `jsonLd` (Event structured data, on by default) and `scheme`.
+
+**Look and theming.** The styles are in the `eventual` cascade layer, so any CSS of your own wins. Neutral colours follow the surrounding text colour, so the pages suit any background; the accent and status colours follow the page's `color-scheme` (set `color-scheme: light dark` on your page, or pass `scheme="dark"` where a block sits on a dark surface). Override these properties on the component or any ancestor; Registrations and Tickets read the same names:
+
+| Property | Default |
+|---|---|
+| `--eventual-primary`, `--eventual-on-primary` | blue (`light-dark(#075985, #7dd3fc)`) and the text on it |
+| `--eventual-text-muted`, `--eventual-border`, `--eventual-surface` | the text colour at 72%, 14% and 3% |
+| `--eventual-cancelled`, `--eventual-changed`, `--eventual-error` | red, amber, red |
+| `--eventual-radius`, `--eventual-control-radius`, `--eventual-focus`, `--eventual-gap` | `0.875rem`, `0.5rem`, the primary colour, `1rem` |
+
+Layouts adapt to the width of the component, not the window (container queries): the month grid becomes a day list below about 700 pixels, and images drop out of narrow rows. All classes start with `eventual-`.
+
+**Accessibility.** Status (cancelled, postponed, rescheduled) shows in every view, each event's content language is marked, the month grid reads full day names and dates, today is marked, and links that open a new tab say so. Checked with axe (WCAG 2.2 AA) in all views in light and dark, and on a 375-pixel screen at 200% text size.
+
+**Lower level.** `buildEventBrowserData(events, url, options)` and `buildEventDetailData(events, id, url, options)` do the same without fetching, for example when you call the SSR dispatcher yourself. `eventPageText(locale)` gives the translated texts. The texts live in the `core-site` namespace of `@vermeulen.solutions/eventual-locales`.
+
+The [example site](../examples/astro-events/README.md) uses both pages with a green accent.
 
 ## Settings, tools and transfer
 

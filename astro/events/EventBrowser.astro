@@ -57,7 +57,7 @@ const viewHeading = state.view === "month" || state.view === "list" || state.vie
 		{showViewSwitch && data.views.length > 1 && (
 			<nav class="eventual-views" aria-label={text.views.label}>
 				<ul>
-					{data.views.map((item) => <li><a href={item.href} aria-current={item.current ? "page" : undefined}>{item.label}</a></li>)}
+					{data.views.map((item) => <li><a href={item.href} aria-current={item.current ? "page" : undefined}><span>{item.label}</span></a></li>)}
 				</ul>
 			</nav>
 		)}

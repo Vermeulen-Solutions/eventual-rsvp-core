@@ -2,6 +2,14 @@
 
 All notable changes to Eventual RSVP – Core (formerly Eventual) are documented here.
 
+## 0.19.0 - 2026-11-26
+
+- **Event pages in the package.** `@vermeulen.solutions/eventual/astro/EventBrowser.astro` (seven views: list, timeline, cards, schedule, date strip, month, locations; month navigation, category filter, subscription link) and `@vermeulen.solutions/eventual/astro/EventDetail.astro` (details, "Add to calendar" with Google, Outlook, Office 365 and the event's `.ics`, subscription link, Event JSON-LD, a slot for `RsvpForm` or `TicketCheckout`). Loaders in `@vermeulen.solutions/eventual/astro/events`: `loadEventBrowser`, `loadEventDetail` (with the HTTP status: 502 when the feed fails, 404 for an unknown event), the pure `buildEventBrowserData` and `buildEventDetailData`, and `eventContentId` and `occurrenceStart` for the Registrations and Tickets components. See [Event pages](./docs/developer-guide.md#event-pages).
+- **21 languages** for the visitor texts, from the new `core-site` namespace of `@vermeulen.solutions/eventual-locales` 0.1.12; right to left for Arabic and Hebrew.
+- **Styles** in the `eventual` cascade layer, light and dark, themed with the shared `--eventual-*` properties. Every view marks cancelled, postponed and rescheduled events. axe reports no WCAG 2.2 AA violations in the seven views and the event page, in light and dark, and nothing overflows at 375 pixels with 200% text.
+- **Astro example** (`examples/astro-events`) uses the components; its copied libraries, components, `.ics` route and 1,300-line stylesheet are removed. Its unit tests moved into Core's test suite.
+- **Plugin:** the Registry bundle only pins `@vermeulen.solutions/eventual-locales` 0.1.12 for its admin language packs (same `core` texts and hashes). No permission, schema or MCP tool changes.
+
 ## 0.18.7 - 2026-11-25
 
 Fixes for points from an independent review of 0.18.4, each checked on the local EmDash 1.5.0 test site.

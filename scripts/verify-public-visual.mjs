@@ -1,4 +1,4 @@
-/** Capture the production Astro example without redesign; CMS data is local fixture data. */
+/** Capture the Astro example (the package's EventBrowser and EventDetail); CMS data is local fixture data. */
 import assert from "node:assert/strict";
 import {createServer} from "node:http";
 import {once} from "node:events";
@@ -35,25 +35,17 @@ try {
     for(const view of ["list","timeline","cards","schedule","dates","month","locations"]) {
       const response=await page.goto(`${origin}/events?month=2026-10&view=${view}`);
       assert.equal(response.status(),200);await page.locator("h1").waitFor();
-      if(view === "month") await page.locator(".calendar-day__events > summary").first().click();
       assert(await page.locator("body").innerText().then(text=>text.includes(events[0].title)));
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${size} ${view} overflow`);
-      if(size === "desktop" && view === "list") {
-        const widths=await page.locator(".agenda-item--without-image").first().evaluate(item=>({
-          item:item.getBoundingClientRect().width,
-          body:item.querySelector(".agenda-item__body").getBoundingClientRect().width,
-        }));
-        assert(widths.body>widths.item*0.7,"Image-less agenda content must use the available row width");
-      }
       const path=resolve(output,`${size}-${view}.png`);await page.screenshot({path,fullPage:true});reports.push({size,view,path,status:response.status()});
     }
     const detail=await page.goto(`${origin}/events/community-day?from=2026-10-10&through=2026-10-11`);
     assert.equal(detail.status(),200);assert(await page.getByRole("heading",{name:events[0].title,exact:true}).isVisible());
-    await page.locator(".calendar-menu > summary").click();
+    await page.locator(".eventual-calmenu > summary").click();
     assert(await page.getByRole("link",{name:"Google Agenda",exact:true}).isVisible());
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${size} detail overflow`);
     // The assertions above prove the open menu; registry screenshots show the closed page.
-    await page.locator(".calendar-menu").evaluate(menu=>{menu.open=false;});
+    await page.locator(".eventual-calmenu").evaluate(menu=>{menu.open=false;});
     const path=resolve(output,`${size}-detail.png`);await page.screenshot({path,fullPage:true});reports.push({size,view:"detail",path,status:detail.status()});
     if(size === "desktop") {mkdirSync("images/registry-0.13.4",{recursive:true});copyFileSync(path,resolve("images/registry-0.13.4/public-event-detail-fr-desktop.png"));}
     state="empty";
@@ -62,7 +54,7 @@ try {
     reports.push({size,view:"empty",path:resolve(output,`${size}-empty.png`),status:empty.status()});
     state="error";
     const failed=await page.goto(`${origin}/events?month=2026-10&view=list`);assert.equal(failed.status(),502);
-    assert(await page.getByRole("status").isVisible());await page.screenshot({path:resolve(output,`${size}-error.png`),fullPage:true});
+    assert(await page.getByRole("alert").isVisible());await page.screenshot({path:resolve(output,`${size}-error.png`),fullPage:true});
     reports.push({size,view:"error",path:resolve(output,`${size}-error.png`),status:failed.status()});
     state="populated";
   }

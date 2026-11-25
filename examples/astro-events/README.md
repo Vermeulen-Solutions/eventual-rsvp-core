@@ -1,23 +1,16 @@
-# Astro visitor showcase
+# Astro event pages example
 
-<p align="center">
-  <img src="../../images/registry-0.11.0/05-public-events.jpg" alt="Astro event browser with seven views" width="90%" />
-</p>
+A small Astro site that shows Eventual's events with the components from the npm package: `EventBrowser` (list, timeline, cards, schedule, date strip, month and locations views) on `/events`, and `EventDetail` (details, calendar actions, structured data) on `/events/<slug>`. Each page is about ten lines. Navigation, filters and menus are plain HTML, without client JavaScript.
 
-This optional, site-owned example renders Eventual feeds. It supplies list, timeline, cards, daily schedule, date strip, month and location views (`/events?view=month`), plus event details, JSON-LD and calendar actions. Navigation, filters and disclosures use HTML rather than client JavaScript.
-
-<p align="center">
-  <img src="../../images/registry-0.13.4/public-event-detail-fr-desktop.png" alt="Event details with calendar actions" width="90%" />
-</p>
+The components bring their own light and dark styles. This example only lays out the page and changes the accent colour to green in [`src/styles/global.css`](src/styles/global.css), to show how a site themes them.
 
 ## Run it
 
-Use Node 24+ and a reachable EmDash site with published Eventual events. Build the parent plugin first; the example depends on `file:../..`.
+Use Node 24+ and a reachable EmDash site with published Eventual events. The example depends on the parent package (`file:../..`).
 
 ```sh
 # From the repository root:
 npm ci
-npm run build
 cd examples/astro-events
 npm ci
 cp .env.example .env
@@ -36,22 +29,20 @@ EVENTUAL_PLUGIN_ID=r_xxxxxxxxxxxxxxxx
 
 Open the URL Astro prints; its default port is 4321 and `/` redirects to `/events`.
 
-## Integration assumptions
+## What the pages do
 
-The feed requests and the subscription link use plugin ID **eventual** unless `EVENTUAL_PLUGIN_ID` is set. A Registry install has a generated ID that starts with `r_`; copy it from the **Subscribe** links on the Eventual RSVP admin page. See the [developer guide](../../docs/developer-guide.md#installation-and-plugin-id). A remote API origin must be reachable by the SSR server; subscription links must also be reachable by visitors' calendar apps.
+- **Plugin ID:** requests and calendar links use **eventual** unless `EVENTUAL_PLUGIN_ID` is set. A Registry install has a generated ID that starts with `r_`; copy it from the **Subscribe** links on the Eventual RSVP admin page. See the [developer guide](../../docs/developer-guide.md#installation-and-plugin-id).
+- **Language:** `EVENTUAL_LOCALE` picks the page texts (21 languages), date formats, the first day of the week and the event content language. Arabic and Hebrew pages are right to left.
+- **Status codes:** the loaders give the HTTP status: 502 when the feed cannot be reached (the page says so instead of showing old data) and 404 for an unknown event.
+- **Registrations and tickets:** put `RsvpForm` or `TicketCheckout` inside `EventDetail`; the [developer guide](../../docs/developer-guide.md#event-pages) shows how.
 
-EVENTUAL_LOCALE controls interface labels, date formatting and week layout (English, Dutch and French labels). The current example requests do **not** pass locale/strict to the feed. To select translated event content, add those options to each fetchPublicFeed call. Display time zone does not rewrite stored event schedules.
-
-Every request fetches the feed; host caching may still apply. The browser shows an unavailable state with HTTP 502 when fetching fails, rather than substituting stale rows. There are no RSVP/registration workflows in this example.
+A remote API origin must be reachable by the Astro server; subscription links must also be reachable by visitors' calendar apps.
 
 ## Checks
 
 ```sh
 npm run check
-npm test
 npm run test:page
-npm run build
-npm run preview
 ```
 
-For editing and installation, use the [main README](../../README.md); this showcase is optional website code.
+`test:page` builds the site and checks a built event page against a fake feed: JSON-LD escaping, hybrid locations, image URLs, the meeting link and French texts.

@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/Vermeulen-Solutions/eventual-rsvp-core/actions/workflows/ci.yml"><img src="https://github.com/Vermeulen-Solutions/eventual-rsvp-core/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
   <a href="https://www.npmjs.com/package/@vermeulen.solutions/eventual"><img src="https://img.shields.io/npm/v/%40vermeulen.solutions%2Feventual?color=176b57&label=npm%20helpers" alt="Latest npm version of the helpers" /></a>
-  <a href="https://plugins.emdashcms.com/plugins/@vermeulen.solutions/eventual"><img src="https://img.shields.io/badge/EmDash_Registry-0.18.7-0b4d3d" alt="EmDash Plugin Registry" /></a>
+  <a href="https://plugins.emdashcms.com/plugins/@vermeulen.solutions/eventual"><img src="https://img.shields.io/badge/EmDash_Registry-0.19.0-0b4d3d" alt="EmDash Plugin Registry" /></a>
   <a href="https://emdashcms.com"><img src="https://img.shields.io/badge/EmDash-1.2%20to%201.6-0b4d3d" alt="EmDash Compatibility" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-d89521" alt="License: MIT" /></a>
   <img src="https://img.shields.io/badge/TypeScript-strict-3178c6" alt="TypeScript Strict" />
@@ -18,7 +18,7 @@
 
 Plan and publish events in [EmDash CMS](https://emdashcms.com). Write announcements, choose venues and organizers, set repeat schedules, and share events through your website and calendar subscriptions.
 
-**Current release: 0.18.7**, the same version on the EmDash Registry and on npm. Events are edited in EmDash's own collections, with rich text, images, drafts and translations. Your site builder connects the feeds to visitor pages; the screenshots below show the optional Astro showcase.
+**Current release: 0.19.0**, the same version on the EmDash Registry and on npm. Events are edited in EmDash's own collections, with rich text, images, drafts and translations. Your site builder adds the visitor pages from the package; the screenshots below show them.
 
 In 0.14.x, old events stored inside the plugin are shown only when an administrator explicitly enables **Show old events saved inside the plugin**. Native collections remain authoritative. See [what changed](./docs/release-notes-0.14.0.md).
 
@@ -49,19 +49,19 @@ Requires **EmDash >=1.2.0 <2.0.0**; tested on 1.2.0, 1.4.0, 1.5.0 and 1.6.0. **1
 ## Visual Tour
 
 ### 1. Website Calendar
-Render public events on your site using the included Astro showcase with seven responsive layouts, month navigation, and category filtering—with zero client-side JavaScript.
+Show events on your site with two ready-made Astro pages from the package: an events page with seven views (list, timeline, cards, schedule, date strip, month and locations), month navigation and a category filter, and an event page with calendar buttons. They come in 21 languages, in light and dark, and without client-side JavaScript; see [Event pages](./docs/developer-guide.md#event-pages).
 
 <p align="center">
-  <img src="./images/registry-0.11.0/05-public-events.jpg" alt="Public Event Browser" width="90%" />
+  <img src="./images/registry-0.19.0/event-pages-list.png" alt="The events page in the list view" width="90%" />
 </p>
 
 ---
 
 ### 2. Event Details & One-Click Calendar Sync
-Visitors can view full event details, join virtual meetings, get venue directions, and add events to Google Calendar, Outlook, Yahoo, or Apple Calendar.
+Visitors can view full event details, join virtual meetings, get venue directions, and add events to Google Calendar, Outlook, Office 365 or any calendar app (iCal file).
 
 <p align="center">
-  <img src="./images/registry-0.13.4/public-event-detail-fr-desktop.png" alt="Public event detail view" width="90%" />
+  <img src="./images/registry-0.19.0/event-page-detail.png" alt="An event page with date, place and calendar buttons" width="90%" />
 </p>
 
 ---
@@ -108,7 +108,7 @@ npm install @vermeulen.solutions/eventual
 
 Keep its version the same as the Registry backend. **Do not run `npm install eventual`:** the unscoped name is an unrelated package by another author.
 
-Use the **installed plugin ID** in API URLs and MCP tool names. A config-managed site uses `eventual`; a Registry install gets a generated ID that starts with `r_`. The **Subscribe** links on the Eventual RSVP admin page show it. Pass it as `pluginId` to `fetchPublicFeed`, and as `EVENTUAL_PLUGIN_ID` to the showcase. Install the backend one way only, from the Registry or from the config: the [developer guide](./docs/developer-guide.md#installation-and-plugin-id) explains what goes wrong otherwise, and [what to do before moving a site to the Registry](./docs/developer-guide.md#moving-a-site-from-the-config-to-the-registry).
+Use the **installed plugin ID** in API URLs and MCP tool names. A config-managed site uses `eventual`; a Registry install gets a generated ID that starts with `r_`. The **Subscribe** links on the Eventual RSVP admin page show it. Pass it as `pluginId` to `fetchPublicFeed`, and to the event page loaders. Install the backend one way only, from the Registry or from the config: the [developer guide](./docs/developer-guide.md#installation-and-plugin-id) explains what goes wrong otherwise, and [what to do before moving a site to the Registry](./docs/developer-guide.md#moving-a-site-from-the-config-to-the-registry).
 
 The [developer guide](./docs/developer-guide.md) covers public JSON/ICS/image routes, SSR dispatch, tool names, settings, transfer formats, permissions and sandbox limits. It also explains installing the matching npm helpers. Eventual RSVP's MCP tools inspect native data; native edits and publication use EmDash's core tools.
 
@@ -134,8 +134,8 @@ The backend shares EmDash's sandbox call budget: the public feeds use up to 30 c
 - [Install and connect](./docs/collection-setup.md) — administrators and schema setup.
 - [Upgrade and migrate](./docs/upgrade-0.13.0.md) — existing sites and old plugin data.
 - [Developer guide](./docs/developer-guide.md) — integration and API reference.
-- [Changelog](./CHANGELOG.md) · [0.18.7 release notes](./docs/release-notes-0.18.7.md) · [0.18.6 release notes](./docs/release-notes-0.18.6.md) · [0.18.5 release notes](./docs/release-notes-0.18.5.md) · [0.15.0 cache integration](./docs/release-notes-0.15.0.md) · [0.14.0 native collections](./docs/release-notes-0.14.0.md).
-- [Astro showcase](./examples/astro-events/README.md) — optional visitor pages.
+- [Changelog](./CHANGELOG.md) · [0.19.0 release notes](./docs/release-notes-0.19.0.md) · [0.18.7 release notes](./docs/release-notes-0.18.7.md) · [0.18.6 release notes](./docs/release-notes-0.18.6.md) · [0.18.5 release notes](./docs/release-notes-0.18.5.md) · [0.15.0 cache integration](./docs/release-notes-0.15.0.md) · [0.14.0 native collections](./docs/release-notes-0.14.0.md).
+- [Astro example site](./examples/astro-events/README.md) — the event pages in a small site.
 - [Release evidence and older records](./docs/history.md).
 
 ---

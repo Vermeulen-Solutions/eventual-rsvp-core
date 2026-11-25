@@ -37,6 +37,17 @@ describe("events page data", () => {
 		expect(data.subscriptionUrl).toBe("webcal://club.example/_emdash/api/plugins/r_abc123/calendar");
 	});
 
+	it("speaks the visitor's language, with plurals and right-to-left scripts", async () => {
+		const fr = await buildEventBrowserData(events, page("?month=2026-11"), { now, locale: "fr-CH" });
+		expect([fr.lang, fr.dir, fr.text.views.list, fr.text.count(2)]).toEqual(["fr", "ltr", "Liste", "2 événements"]);
+		const pl = await buildEventBrowserData(events, page("?month=2026-11"), { now, locale: "pl" });
+		expect([pl.text.count(1), pl.text.count(3), pl.text.count(5)]).toEqual(["1 wydarzenie", "3 wydarzenia", "5 wydarzeń"]);
+		const ar = await buildEventBrowserData(events, page("?month=2026-11"), { now, locale: "ar" });
+		expect([ar.lang, ar.dir]).toEqual(["ar", "rtl"]);
+		const unknown = await buildEventBrowserData(events, page("?month=2026-11"), { now, locale: "xx" });
+		expect([unknown.lang, unknown.text.views.list]).toEqual(["en", "List"]);
+	});
+
 	it("builds the month grid only for the month view", async () => {
 		expect((await buildEventBrowserData(events, page("?month=2026-11&view=month"), { now })).weeks.length).toBe(5);
 		expect((await buildEventBrowserData(events, page("?month=2026-11"), { now })).weeks).toEqual([]);

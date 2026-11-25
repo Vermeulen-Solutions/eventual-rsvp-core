@@ -8,7 +8,7 @@ Eventual RSVP – Core requires EmDash **>=1.2.0 <2.0.0**; it is tested on **1.2
 2. Open **Event settings**, select the event and venue/organizer collections, and choose **Save settings**. Selection connects collections; it does not create them or move entries.
 3. Create a draft, save it, set its schedule in **Dates, venue & repeat**, and publish it. Check it on your site's calendar.
 
-A **content type/collection** is simply the place under **Content** where entries are listed and edited. If compatible collections are missing, ask your site builder to create them with the blueprint below. Your builder adds visitor pages using Eventual's feeds; the [Astro showcase](../examples/astro-events/README.md) is an optional website design.
+A **content type/collection** is simply the place under **Content** where entries are listed and edited. If compatible collections are missing, ask your site builder to create them with the blueprint below. Your builder adds the visitor pages with the package's [event page components](./developer-guide.md#event-pages).
 
 ## Agent tools (optional)
 
