@@ -22,6 +22,9 @@
     "./astro": "./astro/feed.ts",
     "./astro/schema": "./astro/schema.ts",
     "./astro/EventList.astro": "./astro/EventList.astro",
+    "./astro/events": "./astro/events/index.ts",
+    "./astro/EventBrowser.astro": "./astro/events/EventBrowser.astro",
+    "./astro/EventDetail.astro": "./astro/events/EventDetail.astro",
     "./transfer": {
       "types": "./transfer/index.d.mts",
       "import": "./transfer/index.mjs"

@@ -1,0 +1,23 @@
+---
+import type { PublicEvent } from "../../feed";
+import type { EventPageText } from "../i18n";
+import { displayDate } from "../grid";
+
+interface Props {
+	event: PublicEvent;
+	text: EventPageText;
+	locale: string;
+}
+
+const { event, text, locale } = Astro.props;
+const status = event.status === "cancelled" || event.status === "postponed" || event.status === "rescheduled" ? event.status : null;
+const previous = status === "rescheduled" && event.previousStartDate
+	? text.event.originally(displayDate(event.previousStartDate, locale, event.timezone, event.allDay))
+	: "";
+---
+
+{status && (
+	<span class={`eventual-badge eventual-badge--${status}`}>
+		{text.status[status]}{previous && <span class="eventual-badge__detail"> · {previous}</span>}
+	</span>
+)}

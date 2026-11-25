@@ -1,0 +1,740 @@
+<!-- Default look of the event pages. Global (every class is `eventual-` prefixed and scoped under
+     .eventual-browser / .eventual-detail) and in the `eventual` cascade layer, so a site's own
+     unlayered CSS always wins. Astro includes it once however many components use it. -->
+<style is:global>
+@layer eventual {
+	/* Neutrals follow the text colour around the block, so they suit any background. Accent and
+	   status colours follow the page's color-scheme (light-dark()): set `color-scheme: dark` or
+	   `light dark` where the block sits on a dark surface, or pass scheme="dark".
+	   Override any --eventual-* property on the block or an ancestor. */
+	.eventual-browser,
+	.eventual-detail {
+		--_accent: var(--eventual-primary, light-dark(#075985, #7dd3fc));
+		--_on-accent: var(--eventual-on-primary, light-dark(#ffffff, #082f49));
+		--_accent-soft: color-mix(in oklch, var(--_accent) 12%, transparent);
+		--_muted: var(--eventual-text-muted, color-mix(in oklch, currentColor 72%, transparent));
+		--_border: var(--eventual-border, color-mix(in oklch, currentColor 18%, transparent));
+		--_border-strong: color-mix(in oklch, currentColor 34%, transparent);
+		--_surface: var(--eventual-surface, color-mix(in oklch, currentColor 4%, transparent));
+		--_surface-strong: color-mix(in oklch, currentColor 8%, transparent);
+		--_cancelled: var(--eventual-cancelled, light-dark(#991b1b, #fca5a5));
+		--_changed: var(--eventual-changed, light-dark(#92400e, #fcd34d));
+		--_error: var(--eventual-error, light-dark(#991b1b, #fca5a5));
+		--_radius: var(--eventual-radius, 0.75rem);
+		--_control-radius: var(--eventual-control-radius, 0.5rem);
+		--_focus: var(--eventual-focus, var(--_accent));
+		--_gap: var(--eventual-gap, 1rem);
+		container: eventual / inline-size;
+		display: grid;
+		gap: var(--_gap);
+		line-height: 1.5;
+	}
+
+	:where(.eventual-browser, .eventual-detail) :where(h1, h2, h3, h4, h5, h6, p, ul, ol, figure) {
+		margin: 0;
+	}
+
+	:where(.eventual-browser, .eventual-detail) :where(ul, ol) {
+		padding: 0;
+		list-style: none;
+	}
+
+	:where(.eventual-browser, .eventual-detail) a {
+		color: var(--_accent);
+		text-decoration-thickness: from-font;
+		text-underline-offset: 0.18em;
+	}
+
+	:where(.eventual-browser, .eventual-detail) :is(a, button, summary, select, [tabindex]):focus-visible {
+		outline: 2px solid var(--_focus);
+		outline-offset: 2px;
+	}
+
+	:where(.eventual-browser, .eventual-detail) img {
+		display: block;
+		max-inline-size: 100%;
+		block-size: auto;
+	}
+
+	.eventual-sr-only {
+		position: absolute !important;
+		inline-size: 1px;
+		block-size: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
+		border: 0;
+	}
+
+	[dir="rtl"] .eventual-flip {
+		transform: scaleX(-1);
+		display: inline-block;
+	}
+
+	/* ── Header, view switch, toolbar ───────────────────────────────────── */
+	.eventual-browser__header {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: end;
+		justify-content: space-between;
+		gap: 0.75rem 1.5rem;
+	}
+
+	.eventual-browser__title {
+		font-size: 1.75em;
+		line-height: 1.2;
+		overflow-wrap: anywhere;
+	}
+
+	.eventual-browser__intro,
+	.eventual-summary {
+		color: var(--_muted);
+	}
+
+	.eventual-views ul {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem;
+		padding: 0.25rem;
+		border: 1px solid var(--_border);
+		border-radius: calc(var(--_control-radius) + 0.25rem);
+	}
+
+	.eventual-views a {
+		display: inline-flex;
+		align-items: center;
+		min-block-size: 2.25rem;
+		padding: 0.25rem 0.75rem;
+		border-radius: var(--_control-radius);
+		color: inherit;
+		text-decoration: none;
+		font-size: 0.9375em;
+	}
+
+	.eventual-views a:hover {
+		background: var(--_surface-strong);
+	}
+
+	.eventual-views a[aria-current="page"] {
+		background: var(--_accent);
+		color: var(--_on-accent);
+		font-weight: 600;
+	}
+
+	.eventual-toolbar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		padding: 0.75rem;
+		border: 1px solid var(--_border);
+		border-radius: var(--_radius);
+		background: var(--_surface);
+	}
+
+	.eventual-months,
+	.eventual-filter {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.eventual-filter label {
+		font-weight: 600;
+	}
+
+	.eventual-filter select {
+		min-block-size: 2.5rem;
+		max-inline-size: 100%;
+		padding: 0.25rem 0.5rem;
+		border: 1px solid var(--_border-strong);
+		border-radius: var(--_control-radius);
+		background: transparent;
+		color: inherit;
+		font: inherit;
+	}
+
+	.eventual-button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.375rem;
+		min-block-size: 2.5rem;
+		padding: 0.25rem 0.875rem;
+		border: 1px solid var(--_border-strong);
+		border-radius: var(--_control-radius);
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		font-weight: 600;
+		text-decoration: none;
+		cursor: pointer;
+	}
+
+	.eventual-button:hover {
+		background: var(--_surface-strong);
+	}
+
+	.eventual-button--primary {
+		border-color: var(--_accent);
+		background: var(--_accent);
+		color: var(--_on-accent);
+	}
+
+	.eventual-button--primary:hover {
+		background: color-mix(in oklch, var(--_accent) 86%, currentColor);
+	}
+
+	.eventual-button--icon {
+		inline-size: 2.5rem;
+		padding: 0;
+	}
+
+	.eventual-button svg {
+		inline-size: 1.25em;
+		block-size: 1.25em;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 2;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+	}
+
+	.eventual-months [aria-current="date"] {
+		border-color: var(--_accent);
+	}
+
+	/* ── Notices and badges ─────────────────────────────────────────────── */
+	.eventual-notice {
+		display: grid;
+		gap: 0.5rem;
+		padding: 1.25rem;
+		border: 1px solid var(--_border);
+		border-radius: var(--_radius);
+		background: var(--_surface);
+	}
+
+	.eventual-notice > :first-child {
+		font-size: 1.125em;
+	}
+
+	.eventual-notice--error {
+		border-color: var(--_error);
+	}
+
+	.eventual-badge {
+		display: inline-block;
+		padding: 0 0.5rem;
+		border: 1px solid currentColor;
+		border-radius: 999px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		line-height: 1.6;
+		vertical-align: 0.15em;
+		white-space: nowrap;
+	}
+
+	.eventual-badge--cancelled {
+		color: var(--_cancelled);
+	}
+
+	.eventual-badge--postponed,
+	.eventual-badge--rescheduled {
+		color: var(--_changed);
+	}
+
+	.eventual-badge__detail {
+		font-weight: 400;
+	}
+
+	.eventual-is-cancelled :is(.eventual-agenda__title, .eventual-card__title, .eventual-month__name, .eventual-detail__title) > a,
+	.eventual-detail.eventual-is-cancelled .eventual-detail__title {
+		text-decoration-line: line-through;
+	}
+
+	.eventual-tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.375rem;
+	}
+
+	.eventual-tags li {
+		padding: 0.0625rem 0.5rem;
+		border-radius: 999px;
+		background: var(--_surface-strong);
+		font-size: 0.8125em;
+	}
+
+	/* ── Agenda items (list, schedule, dates, locations) ────────────────── */
+	.eventual-stack {
+		display: grid;
+		gap: 0.75rem;
+	}
+
+	.eventual-agenda {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		gap: 0.75rem 1rem;
+		padding: 0.875rem;
+		border: 1px solid var(--_border);
+		border-radius: var(--_radius);
+	}
+
+	.eventual-agenda:has(.eventual-agenda__image) {
+		grid-template-columns: auto 8rem minmax(0, 1fr);
+	}
+
+	.eventual-agenda--compact {
+		grid-template-columns: minmax(0, 1fr);
+		padding: 0.625rem 0.875rem;
+	}
+
+	.eventual-agenda__date {
+		display: grid;
+		justify-items: center;
+		align-content: start;
+		min-inline-size: 3.75rem;
+		padding: 0.5rem 0.375rem;
+		border-radius: var(--_control-radius);
+		background: var(--_accent-soft);
+		color: inherit;
+		font-size: 0.8125em;
+		line-height: 1.25;
+		text-transform: uppercase;
+	}
+
+	.eventual-agenda__date strong {
+		font-size: 1.75em;
+		line-height: 1.1;
+	}
+
+	.eventual-agenda__image {
+		inline-size: 8rem;
+		aspect-ratio: 4 / 3;
+		object-fit: cover;
+		border-radius: var(--_control-radius);
+	}
+
+	.eventual-agenda__body {
+		display: grid;
+		gap: 0.25rem;
+		align-content: start;
+		min-inline-size: 0;
+	}
+
+	.eventual-agenda__time,
+	.eventual-agenda__place,
+	.eventual-agenda__excerpt,
+	.eventual-card__when,
+	.eventual-card__place,
+	.eventual-card__organizer,
+	.eventual-card__excerpt {
+		color: var(--_muted);
+		font-size: 0.9375em;
+	}
+
+	.eventual-agenda__time,
+	.eventual-card__when {
+		font-weight: 600;
+	}
+
+	.eventual-agenda__title,
+	.eventual-card__title {
+		font-size: 1.125em;
+		line-height: 1.3;
+		overflow-wrap: anywhere;
+	}
+
+	@container eventual (max-width: 34rem) {
+		.eventual-agenda:has(.eventual-agenda__image) {
+			grid-template-columns: auto minmax(0, 1fr);
+		}
+
+		.eventual-agenda__image {
+			display: none;
+		}
+	}
+
+	/* Narrow blocks and large text: the date goes on one line above the event. */
+	@container eventual (max-width: 26rem) {
+		.eventual-agenda,
+		.eventual-agenda:has(.eventual-agenda__image) {
+			grid-template-columns: minmax(0, 1fr);
+		}
+
+		.eventual-agenda__date {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: baseline;
+			justify-self: start;
+			gap: 0.375em;
+			min-inline-size: 0;
+			padding: 0.25rem 0.625rem;
+		}
+
+		.eventual-agenda__date strong {
+			font-size: 1.25em;
+		}
+	}
+
+	/* ── Cards and timeline ─────────────────────────────────────────────── */
+	.eventual-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+		gap: 1rem;
+	}
+
+	.eventual-card {
+		display: grid;
+		grid-template-rows: auto 1fr;
+		block-size: 100%;
+		overflow: hidden;
+		border: 1px solid var(--_border);
+		border-radius: var(--_radius);
+	}
+
+	.eventual-card__image {
+		inline-size: 100%;
+		aspect-ratio: 16 / 9;
+		object-fit: cover;
+	}
+
+	.eventual-card__body {
+		display: grid;
+		gap: 0.375rem;
+		align-content: start;
+		padding: 1rem;
+	}
+
+	.eventual-timeline {
+		display: grid;
+		gap: 1rem;
+		padding-inline-start: 1.5rem;
+		border-inline-start: 2px solid var(--_border);
+	}
+
+	.eventual-timeline > li {
+		position: relative;
+	}
+
+	.eventual-timeline > li::before {
+		content: "";
+		position: absolute;
+		inset-block-start: 1.25rem;
+		inset-inline-start: calc(-1.5rem - 7px);
+		inline-size: 12px;
+		block-size: 12px;
+		border-radius: 50%;
+		background: var(--_accent);
+		box-shadow: 0 0 0 3px var(--_accent-soft);
+	}
+
+	.eventual-card--timeline .eventual-card__image {
+		aspect-ratio: 21 / 9;
+	}
+
+	@container eventual (max-width: 28rem) {
+		.eventual-timeline {
+			padding-inline-start: 0.875rem;
+		}
+
+		.eventual-timeline > li::before {
+			inset-inline-start: calc(-0.875rem - 7px);
+		}
+	}
+
+	/* ── Schedule, date strip, locations ────────────────────────────────── */
+	.eventual-day {
+		border: 1px solid var(--_border);
+		border-radius: var(--_radius);
+	}
+
+	.eventual-day > summary {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: 0.25rem 1rem;
+		padding: 0.75rem 1rem;
+		font-weight: 600;
+		cursor: pointer;
+	}
+
+	.eventual-day__count {
+		color: var(--_muted);
+		font-weight: 400;
+	}
+
+	.eventual-day > .eventual-stack {
+		padding: 0 1rem 1rem;
+	}
+
+	.eventual-datestrip ul {
+		display: flex;
+		gap: 0.5rem;
+		overflow-x: auto;
+		padding-block-end: 0.25rem;
+	}
+
+	.eventual-datestrip a {
+		display: grid;
+		justify-items: center;
+		min-inline-size: 3.5rem;
+		padding: 0.5rem;
+		border: 1px solid var(--_border);
+		border-radius: var(--_control-radius);
+		color: inherit;
+		text-decoration: none;
+		font-size: 0.875em;
+		line-height: 1.2;
+	}
+
+	.eventual-datestrip a:hover {
+		border-color: var(--_accent);
+		background: var(--_accent-soft);
+	}
+
+	.eventual-datestrip strong {
+		font-size: 1.375em;
+	}
+
+	.eventual-dategroup,
+	.eventual-place {
+		display: grid;
+		gap: 0.5rem;
+		scroll-margin-block-start: 1rem;
+	}
+
+	.eventual-dategroup > :first-child,
+	.eventual-month-list__day {
+		font-size: 1.0625em;
+	}
+
+	.eventual-place__header {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.25rem 1rem;
+	}
+
+	.eventual-view {
+		display: grid;
+		gap: 1.25rem;
+	}
+
+	/* ── Month ──────────────────────────────────────────────────────────── */
+	.eventual-month {
+		inline-size: 100%;
+		border-collapse: collapse;
+		table-layout: fixed;
+	}
+
+	.eventual-month th {
+		padding: 0.375rem;
+		color: var(--_muted);
+		font-size: 0.8125em;
+		font-weight: 600;
+		text-align: start;
+	}
+
+	.eventual-month__day {
+		block-size: 6.5rem;
+		padding: 0.375rem;
+		border: 1px solid var(--_border);
+		vertical-align: top;
+	}
+
+	.eventual-month__day--outside {
+		background: var(--_surface);
+		color: var(--_muted);
+	}
+
+	.eventual-month__day > time {
+		display: inline-grid;
+		place-items: center;
+		min-inline-size: 1.75rem;
+		block-size: 1.75rem;
+		border-radius: 999px;
+		font-weight: 600;
+		font-size: 0.875em;
+	}
+
+	.eventual-month__day--today > time {
+		background: var(--_accent);
+		color: var(--_on-accent);
+	}
+
+	.eventual-month__events {
+		display: grid;
+		gap: 0.25rem;
+		margin-block-start: 0.25rem;
+		font-size: 0.8125em;
+		line-height: 1.3;
+	}
+
+	.eventual-month__events a {
+		display: block;
+		padding: 0.125rem 0.25rem;
+		border-radius: 0.25rem;
+		background: var(--_accent-soft);
+		text-decoration: none;
+		overflow-wrap: anywhere;
+	}
+
+	.eventual-month__events a:hover {
+		text-decoration: underline;
+	}
+
+	/* Full link colour: a muted accent on the accent tint falls below 4.5:1. */
+	.eventual-month__time {
+		display: block;
+		font-size: 0.9em;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.eventual-month__name {
+		color: inherit;
+	}
+
+	.eventual-month-list {
+		display: none;
+	}
+
+	@container eventual (max-width: 44rem) {
+		.eventual-month {
+			display: none;
+		}
+
+		.eventual-month-list {
+			display: grid;
+		}
+	}
+
+	/* ── Detail page ────────────────────────────────────────────────────── */
+	.eventual-detail {
+		gap: 1.25rem;
+	}
+
+	.eventual-detail__header {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem 0.75rem;
+	}
+
+	.eventual-detail__title {
+		font-size: 2em;
+		line-height: 1.15;
+		overflow-wrap: anywhere;
+	}
+
+	.eventual-detail__facts {
+		display: grid;
+		gap: 0.25rem;
+		color: var(--_muted);
+	}
+
+	.eventual-detail__when {
+		color: inherit;
+		font-weight: 600;
+	}
+
+	.eventual-detail__actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: start;
+		gap: 0.5rem;
+	}
+
+	.eventual-calmenu > summary {
+		list-style: none;
+	}
+
+	.eventual-calmenu > summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.eventual-calmenu > summary::after {
+		content: "";
+		inline-size: 0.5em;
+		block-size: 0.5em;
+		border-inline-end: 2px solid currentColor;
+		border-block-end: 2px solid currentColor;
+		transform: translateY(-0.15em) rotate(45deg);
+	}
+
+	.eventual-calmenu[open] > summary::after {
+		transform: translateY(0.1em) rotate(-135deg);
+	}
+
+	.eventual-calmenu__options {
+		display: grid;
+		margin-block-start: 0.375rem;
+		padding: 0.25rem;
+		border: 1px solid var(--_border);
+		border-radius: var(--_control-radius);
+	}
+
+	.eventual-calmenu__options a {
+		display: block;
+		padding: 0.5rem 0.75rem;
+		border-radius: 0.375rem;
+		text-decoration: none;
+	}
+
+	.eventual-calmenu__options a:hover {
+		background: var(--_accent-soft);
+		text-decoration: underline;
+	}
+
+	.eventual-detail__image {
+		inline-size: 100%;
+		max-block-size: 28rem;
+		object-fit: cover;
+		border-radius: var(--_radius);
+	}
+
+	.eventual-detail__description {
+		display: grid;
+		gap: 0.75em;
+		max-inline-size: 68ch;
+	}
+
+	.eventual-detail__description :is(ul, ol) {
+		padding-inline-start: 1.25em;
+	}
+
+	.eventual-detail__description ul {
+		list-style: disc;
+	}
+
+	.eventual-detail__description ol {
+		list-style: decimal;
+	}
+
+	.eventual-detail__description blockquote {
+		margin: 0;
+		padding-inline-start: 1em;
+		border-inline-start: 3px solid var(--_border-strong);
+	}
+
+	@media (forced-colors: active) {
+		.eventual-views a[aria-current="page"],
+		.eventual-button--primary,
+		.eventual-month__day--today > time {
+			border: 1px solid ButtonText;
+			forced-color-adjust: none;
+			background: Highlight;
+			color: HighlightText;
+		}
+
+		.eventual-timeline > li::before {
+			background: CanvasText;
+		}
+	}
+}
+</style>

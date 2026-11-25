@@ -1,0 +1,95 @@
+---
+/**
+ * An event's page body. Render it inside your own layout with data from `loadEventDetail`
+ * (which also gives the HTTP status, the title and the description for the head). Anything
+ * passed as children (for example RsvpForm or TicketCheckout) appears after the details.
+ */
+import type { EventDetailData } from "./index";
+import StatusBadge from "./parts/StatusBadge.astro";
+import Styles from "./parts/Styles.astro";
+
+interface Props {
+	data: EventDetailData;
+	headingLevel?: 1 | 2;
+	/** Link back to the events page; false for none. */
+	backHref?: string | false;
+	showSubscribe?: boolean;
+	/** Structured data for search engines (Event JSON-LD). */
+	jsonLd?: boolean;
+	scheme?: "light" | "dark" | "light dark";
+	class?: string;
+}
+
+const { data, headingLevel = 1, backHref = data.backHref, showSubscribe = true, jsonLd = true, scheme, class: className } = Astro.props;
+const { text, event, locale } = data;
+const H1 = `h${headingLevel}` as "h1";
+const H2 = `h${headingLevel + 1}` as "h2";
+const links = data.calendarLinks;
+const contentLang = event?.locale && event.locale.split("-")[0] !== data.lang.split("-")[0] ? event.locale : undefined;
+---
+
+<Styles />
+<article class:list={["eventual-detail", className, event?.status === "cancelled" && "eventual-is-cancelled"]} lang={data.lang} dir={data.dir} style={scheme ? `color-scheme: ${scheme}` : undefined}>
+	{backHref && <p class="eventual-detail__back"><a href={backHref}><span aria-hidden="true" class="eventual-flip">←</span> {text.event.back}</a></p>}
+
+	{data.status === 502 ? (
+		<div class="eventual-notice eventual-notice--error" role="alert">
+			<H1>{text.notice.unavailable}</H1>
+			<p>{text.notice.unavailableDetail}</p>
+		</div>
+	) : !event ? (
+		<div class="eventual-notice">
+			<H1>{text.event.details}</H1>
+			<p>{text.notice.notFound}</p>
+		</div>
+	) : (
+		<>
+			<header class="eventual-detail__header" lang={contentLang}>
+				<H1 class="eventual-detail__title">{event.title}</H1>
+				<StatusBadge event={event} text={text} locale={locale} />
+			</header>
+
+			<div class="eventual-detail__facts">
+				<p class="eventual-detail__when"><time datetime={event.start}>{data.dateText}</time>{data.timeText && <> · {data.timeText}</>}</p>
+				{event.location && (
+					<p>{event.location}{data.directionsUrl && <> · <a href={data.directionsUrl} target="_blank" rel="noopener noreferrer">{text.event.directions}<span class="eventual-sr-only"> {text.newTab}</span></a></>}</p>
+				)}
+				{event.organizer && <p>{text.event.organizer(event.organizer)}</p>}
+			</div>
+
+			<ul class="eventual-detail__actions">
+				{links && (
+					<li>
+						<details class="eventual-calmenu">
+							<summary class="eventual-button eventual-button--primary">{text.calendar.add}</summary>
+							<ul class="eventual-calmenu__options" aria-label={text.calendar.addFor(event.title)}>
+								<li><a href={links.google} target="_blank" rel="noopener noreferrer">{text.calendar.google}<span class="eventual-sr-only"> {text.newTab}</span></a></li>
+								<li><a href={links.outlook} target="_blank" rel="noopener noreferrer">{text.calendar.outlook}<span class="eventual-sr-only"> {text.newTab}</span></a></li>
+								<li><a href={links.office365} target="_blank" rel="noopener noreferrer">{text.calendar.office365}<span class="eventual-sr-only"> {text.newTab}</span></a></li>
+								<li><a href={links.ics} download>{text.calendar.ics}</a></li>
+							</ul>
+						</details>
+					</li>
+				)}
+				{showSubscribe && data.subscriptionUrl && <li><a class="eventual-button" href={data.subscriptionUrl}>{text.calendar.subscribe}</a></li>}
+				{data.onlineUrl && <li><a class="eventual-button" href={data.onlineUrl} target="_blank" rel="noopener noreferrer">{text.event.joinOnline}<span class="eventual-sr-only"> {text.newTab}</span></a></li>}
+				{data.websiteUrl && <li><a class="eventual-button" href={data.websiteUrl} target="_blank" rel="noopener noreferrer">{text.event.website}<span class="eventual-sr-only"> {text.newTab}</span></a></li>}
+			</ul>
+
+			{data.imageUrl && <img class="eventual-detail__image" src={data.imageUrl} alt={event.imageMedia?.alt ?? ""} width={event.imageMedia?.width} height={event.imageMedia?.height} decoding="async" />}
+
+			{data.descriptionHtml && <div class="eventual-detail__description" lang={contentLang} set:html={data.descriptionHtml} />}
+
+			{event.categories.length > 0 && (
+				<section class="eventual-detail__categories" aria-labelledby="eventual-detail-categories">
+					<H2 id="eventual-detail-categories" class="eventual-sr-only">{text.event.categories}</H2>
+					<ul class="eventual-tags">{event.categories.map((category) => <li>{category}</li>)}</ul>
+				</section>
+			)}
+
+			<slot />
+
+			{jsonLd && data.jsonLd && <script type="application/ld+json" set:html={data.jsonLd} />}
+		</>
+	)}
+</article>

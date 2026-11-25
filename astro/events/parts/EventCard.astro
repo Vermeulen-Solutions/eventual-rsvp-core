@@ -1,0 +1,51 @@
+---
+import type { PublicEvent } from "../../feed";
+import type { EventBrowserData } from "../index";
+import { eventHref } from "../index";
+import { displayDate, eventEndDate, eventStartDate, eventTimeRange } from "../grid";
+import { safeImageUrl } from "../links";
+import { safeWebUrl } from "../../event-details";
+import { descriptionExcerpt } from "../description";
+import StatusBadge from "./StatusBadge.astro";
+
+interface Props {
+	event: PublicEvent;
+	data: EventBrowserData;
+	level: number;
+	variant?: "grid" | "timeline";
+}
+
+const { event, data, level, variant = "grid" } = Astro.props;
+const { text, locale } = data;
+const Heading = `h${Math.min(6, level)}` as "h3";
+const href = eventHref(event, data);
+const imageUrl = safeImageUrl(event.imageMedia?.src || event.imageUrl, data.origin);
+const directionsUrl = safeWebUrl(event.directionsUrl);
+const sameDay = eventStartDate(event) === eventEndDate(event);
+const start = displayDate(event.start, locale, event.timezone, event.allDay);
+const end = displayDate(event.end, locale, event.timezone, event.allDay);
+const time = event.allDay ? text.event.allDay : eventTimeRange(event, locale);
+const contentLang = event.locale && event.locale.split("-")[0] !== data.lang.split("-")[0] ? event.locale : undefined;
+---
+
+<article class:list={["eventual-card", `eventual-card--${variant}`, event.status === "cancelled" && "eventual-is-cancelled"]} lang={contentLang}>
+	{imageUrl && <img class="eventual-card__image" src={imageUrl} alt="" width={event.imageMedia?.width} height={event.imageMedia?.height} loading="lazy" decoding="async" />}
+	<div class="eventual-card__body">
+		<p class="eventual-card__when">
+			<time datetime={event.start}>{start}</time>
+			{!sameDay && <> – <time datetime={event.end}>{end}</time></>}
+			{time && <> · {time}</>}
+		</p>
+		<Heading class="eventual-card__title"><a href={href}>{event.title}</a> <StatusBadge event={event} text={text} locale={locale} /></Heading>
+		{event.location && (
+			<p class="eventual-card__place">{event.location}{directionsUrl && <> · <a href={directionsUrl} target="_blank" rel="noopener noreferrer">{text.event.directions}<span class="eventual-sr-only"> {text.newTab}</span></a></>}</p>
+		)}
+		{event.organizer && <p class="eventual-card__organizer">{text.event.organizer(event.organizer)}</p>}
+		{event.description && <p class="eventual-card__excerpt">{descriptionExcerpt(event.description)}</p>}
+		{event.categories.length > 0 && (
+			<ul class="eventual-tags" aria-label={text.event.categories}>
+				{event.categories.map((category) => <li>{category}</li>)}
+			</ul>
+		)}
+	</div>
+</article>
