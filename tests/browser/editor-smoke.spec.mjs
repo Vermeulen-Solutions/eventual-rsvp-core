@@ -32,7 +32,8 @@ const savePanel=async(page,label)=>{
   await page.getByRole('button',{name:label,exact:true}).click();
   const saved=await response;expect(saved.ok()).toBe(true);
   expect((await saved.json()).data.toast?.type).toBe('success');
-  await expect(page.getByText('Brouillon des dates enregistré.',{exact:true})).toBeVisible();
+  // EmDash 1.6 keeps the previous save's notice on screen, so the newest one is checked.
+  await expect(page.getByText('Brouillon des dates enregistré.',{exact:true}).last()).toBeVisible();
   await expect(page.locator('[contenteditable=true]')).toContainText('Annonce riche préservée');
   expect(page.url()).toBe(url);expect(navigations,'Panel save must not submit/reload the outer editor form').toEqual([]);
  } finally {page.off('framenavigated',listener);}
