@@ -2,6 +2,20 @@
 
 All notable changes to Eventual RSVP – Core (formerly Eventual) are documented here.
 
+## 0.18.7 - 2026-11-25
+
+Fixes for points from an independent review of 0.18.4, each checked on the local EmDash 1.5.0 test site.
+
+- **Google, Outlook and Office 365 links carry readable text.** Native descriptions are Portable Text, and the links put its raw JSON (`[{"_type":"block",…`) into the calendar entry. They now get the plain text.
+- **Admin links open on the site you are on.** "Edit", "Edit the copy" and "Create event" use the admin's own link type. "All events", the venue and organizer links and the Subscribe links use the address the editor is on when it differs from the configured site address, so a staging or local copy no longer opens the live site's admin.
+- **Larger feeds.** The two public feeds may make 30 calls to EmDash per request instead of 10 (EmDash allows 30 on Cloudflare since 1.5; Node has no limit). The calendar's saved state stores a short hash per event instead of the event's full text, so it no longer outgrows its 1 MiB limit at about 500 events. On the test site both feeds served 714 upcoming one-off events, where 0.18.4 stopped at about 300 (calendar) and 600 (JSON). Snapshots from earlier versions are read as they are, without a spurious update for subscribers.
+- **Deleting a venue or organizer that a live event uses** is refused cleanly ("Delete blocked by plugin hook" in the dialog) instead of showing the editor an error page. EmDash's delete hook cannot pass Core's own reason.
+- **Event settings lists only collections that fit:** event collections need a schedule, venue and organizer collections a name or title. With no event collection at all, the page says to apply the event blueprint.
+- **One sidebar entry each for venues and organizers.** Core's own Venues and Organizers pages only linked to EmDash's collections and are removed.
+- **`EventList`:** the calendar links' group is named after the event, each link's name is its visible text (the `.ics` link reads "Download iCal file"), and cancelled and rescheduled events are marked. It now has light default styles for light and dark pages (in the `eventual` cascade layer, adjustable with `--eventual-list-*` properties). axe reports no violations on either, and nothing overflows at phone width with 200% text.
+- **Schema exporter:** new events start in the time zone of the computer that runs it, or the one given with `--timezone`, instead of Europe/Zurich.
+- No permission or schema changes, and no new MCP tools.
+
 ## 0.18.6 - 2026-11-25
 
 - **Tested on EmDash 1.6.0.** The source installer no longer warns on EmDash, Admin or Block Kit 1.6.0, and both of its admin adapters apply to the 1.6 builds. The browser acceptance passes on a fresh 1.6.0 site with the sandbox runner 0.9.8; its panel-save check now reads the newest notice, because 1.6 keeps the previous one on screen.

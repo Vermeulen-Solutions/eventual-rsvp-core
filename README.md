@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/Vermeulen-Solutions/eventual-rsvp-core/actions/workflows/ci.yml"><img src="https://github.com/Vermeulen-Solutions/eventual-rsvp-core/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
   <a href="https://www.npmjs.com/package/@vermeulen.solutions/eventual"><img src="https://img.shields.io/npm/v/%40vermeulen.solutions%2Feventual?color=176b57&label=npm%20helpers" alt="Latest npm version of the helpers" /></a>
-  <a href="https://plugins.emdashcms.com/plugins/@vermeulen.solutions/eventual"><img src="https://img.shields.io/badge/EmDash_Registry-0.18.6-0b4d3d" alt="EmDash Plugin Registry" /></a>
+  <a href="https://plugins.emdashcms.com/plugins/@vermeulen.solutions/eventual"><img src="https://img.shields.io/badge/EmDash_Registry-0.18.7-0b4d3d" alt="EmDash Plugin Registry" /></a>
   <a href="https://emdashcms.com"><img src="https://img.shields.io/badge/EmDash-1.2%20to%201.6-0b4d3d" alt="EmDash Compatibility" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-d89521" alt="License: MIT" /></a>
   <img src="https://img.shields.io/badge/TypeScript-strict-3178c6" alt="TypeScript Strict" />
@@ -18,7 +18,7 @@
 
 Plan and publish events in [EmDash CMS](https://emdashcms.com). Write announcements, choose venues and organizers, set repeat schedules, and share events through your website and calendar subscriptions.
 
-**Current release: 0.18.6**, the same version on the EmDash Registry and on npm. Events are edited in EmDash's own collections, with rich text, images, drafts and translations. Your site builder connects the feeds to visitor pages; the screenshots below show the optional Astro showcase.
+**Current release: 0.18.7**, the same version on the EmDash Registry and on npm. Events are edited in EmDash's own collections, with rich text, images, drafts and translations. Your site builder connects the feeds to visitor pages; the screenshots below show the optional Astro showcase.
 
 In 0.14.x, old events stored inside the plugin are shown only when an administrator explicitly enables **Show old events saved inside the plugin**. Native collections remain authoritative. See [what changed](./docs/release-notes-0.14.0.md).
 
@@ -124,7 +124,7 @@ npm run bundle
 npm run budget
 ```
 
-The backend shares EmDash's fixed sandbox RPC budget. Large feeds and migrations need host-specific verification; optional public URL lookups can be disabled when your site constructs its own links. [Details and checks](./docs/developer-guide.md#limits-and-checks).
+The backend shares EmDash's sandbox call budget: the public feeds use up to 30 calls per request, everything else 10. Large feeds and migrations need host-specific verification; optional public URL lookups can be disabled when your site constructs its own links. [Details and checks](./docs/developer-guide.md#limits-and-checks).
 
 ---
 
@@ -134,7 +134,7 @@ The backend shares EmDash's fixed sandbox RPC budget. Large feeds and migrations
 - [Install and connect](./docs/collection-setup.md) — administrators and schema setup.
 - [Upgrade and migrate](./docs/upgrade-0.13.0.md) — existing sites and old plugin data.
 - [Developer guide](./docs/developer-guide.md) — integration and API reference.
-- [Changelog](./CHANGELOG.md) · [0.18.6 release notes](./docs/release-notes-0.18.6.md) · [0.18.5 release notes](./docs/release-notes-0.18.5.md) · [0.15.0 cache integration](./docs/release-notes-0.15.0.md) · [0.14.0 native collections](./docs/release-notes-0.14.0.md).
+- [Changelog](./CHANGELOG.md) · [0.18.7 release notes](./docs/release-notes-0.18.7.md) · [0.18.6 release notes](./docs/release-notes-0.18.6.md) · [0.18.5 release notes](./docs/release-notes-0.18.5.md) · [0.15.0 cache integration](./docs/release-notes-0.15.0.md) · [0.14.0 native collections](./docs/release-notes-0.14.0.md).
 - [Astro showcase](./examples/astro-events/README.md) — optional visitor pages.
 - [Release evidence and older records](./docs/history.md).
 

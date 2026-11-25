@@ -24,7 +24,7 @@ To reuse an announcement, choose **Duplicate** in Eventual's event list. The cop
 
 ## Venues, organizers and languages
 
-**Eventual → Venues** and **Organizers** link to their collections. Create and publish referenced entries before publishing an event that uses them. Published meeting/contact URLs appear in public feeds; use links intended for visitors.
+Venues and organizers are ordinary EmDash collections: open them from the sidebar, or from the links on the **Eventual RSVP** page. Create and publish referenced entries before publishing an event that uses them. Published meeting/contact URLs appear in public feeds; use links intended for visitors.
 
 Use EmDash's translation controls for other languages. Each language has its own title, description and individual-date announcement. Published schedules and venue/organizer selections are shared across translations. Your site's translation service is a separate choice.
 
