@@ -21,7 +21,7 @@ test("source editor accepts every tested core version", () => {
 });
 
 test("newer untested EmDash and toolchain versions run with a warning instead of being refused", () => {
-  for (const version of ["1.3.1", "1.6.0", "2.0.0"]) {
+  for (const version of ["1.3.1", "1.7.0", "2.0.0"]) {
     const warnings = [];
     assert.deepEqual(
       checkEditorVersions(() => version, message => warnings.push(message)),

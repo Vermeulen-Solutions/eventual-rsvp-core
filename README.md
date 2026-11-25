@@ -7,8 +7,8 @@
 <p align="center">
   <a href="https://github.com/Vermeulen-Solutions/eventual-rsvp-core/actions/workflows/ci.yml"><img src="https://github.com/Vermeulen-Solutions/eventual-rsvp-core/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
   <a href="https://www.npmjs.com/package/@vermeulen.solutions/eventual"><img src="https://img.shields.io/npm/v/%40vermeulen.solutions%2Feventual?color=176b57&label=npm%20helpers" alt="Latest npm version of the helpers" /></a>
-  <a href="https://plugins.emdashcms.com/plugins/@vermeulen.solutions/eventual"><img src="https://img.shields.io/badge/EmDash_Registry-0.18.5-0b4d3d" alt="EmDash Plugin Registry" /></a>
-  <a href="https://emdashcms.com"><img src="https://img.shields.io/badge/EmDash-1.2%20to%201.5-0b4d3d" alt="EmDash Compatibility" /></a>
+  <a href="https://plugins.emdashcms.com/plugins/@vermeulen.solutions/eventual"><img src="https://img.shields.io/badge/EmDash_Registry-0.18.6-0b4d3d" alt="EmDash Plugin Registry" /></a>
+  <a href="https://emdashcms.com"><img src="https://img.shields.io/badge/EmDash-1.2%20to%201.6-0b4d3d" alt="EmDash Compatibility" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-d89521" alt="License: MIT" /></a>
   <img src="https://img.shields.io/badge/TypeScript-strict-3178c6" alt="TypeScript Strict" />
   <img src="https://img.shields.io/badge/Sandbox-1%20host%20(language%20packs)-2ea44f" alt="One outbound host: language packs" />
@@ -18,7 +18,7 @@
 
 Plan and publish events in [EmDash CMS](https://emdashcms.com). Write announcements, choose venues and organizers, set repeat schedules, and share events through your website and calendar subscriptions.
 
-**Current release: 0.18.5**, the same version on the EmDash Registry and on npm. Events are edited in EmDash's own collections, with rich text, images, drafts and translations. Your site builder connects the feeds to visitor pages; the screenshots below show the optional Astro showcase.
+**Current release: 0.18.6**, the same version on the EmDash Registry and on npm. Events are edited in EmDash's own collections, with rich text, images, drafts and translations. Your site builder connects the feeds to visitor pages; the screenshots below show the optional Astro showcase.
 
 In 0.14.x, old events stored inside the plugin are shown only when an administrator explicitly enables **Show old events saved inside the plugin**. Native collections remain authoritative. See [what changed](./docs/release-notes-0.14.0.md).
 
@@ -42,7 +42,7 @@ In 0.14.x, old events stored inside the plugin are shown only when an administra
 
 For the opt-in HTML cache integration, see [public feed caching](./docs/public-feed-caching.md). Eventual RSVP does not enable site caching.
 
-Requires **EmDash >=1.2.0 <2.0.0**; tested on 1.2.0, 1.4.0 and 1.5.0. **1.4.0 or newer is recommended** because it fixes nested Block Kit forms and Cloudflare plugin mutations; 1.2/1.3 remain supported with those host limitations. Newer EmDash releases that have not been tested yet are not refused: the source installer prints a warning, and if the editor adapters no longer match a newer admin build they step aside and EmDash's own editor is used. Upgrades from 0.12.x or earlier need the [native-content upgrade](./docs/upgrade-0.13.0.md). Source/developer tooling needs Node 24+.
+Requires **EmDash >=1.2.0 <2.0.0**; tested on 1.2.0, 1.4.0, 1.5.0 and 1.6.0. **1.4.0 or newer is recommended** because it fixes nested Block Kit forms and Cloudflare plugin mutations; 1.2/1.3 remain supported with those host limitations. Newer EmDash releases that have not been tested yet are not refused: the source installer prints a warning, and if the editor adapters no longer match a newer admin build they step aside and EmDash's own editor is used. Upgrades from 0.12.x or earlier need the [native-content upgrade](./docs/upgrade-0.13.0.md). Source/developer tooling needs Node 24+.
 
 ---
 
@@ -108,7 +108,7 @@ npm install @vermeulen.solutions/eventual
 
 Keep its version the same as the Registry backend. **Do not run `npm install eventual`:** the unscoped name is an unrelated package by another author.
 
-Use the **installed plugin ID** in API URLs and MCP tool names. A config-managed site uses `eventual`; a Registry install gets a generated ID that starts with `r_`. The **Subscribe** links on the Eventual RSVP admin page show it. Pass it as `pluginId` to `fetchPublicFeed`, and as `EVENTUAL_PLUGIN_ID` to the showcase. Install the backend one way only, from the Registry or from the config: the [developer guide](./docs/developer-guide.md#installation-and-plugin-id) explains what goes wrong otherwise.
+Use the **installed plugin ID** in API URLs and MCP tool names. A config-managed site uses `eventual`; a Registry install gets a generated ID that starts with `r_`. The **Subscribe** links on the Eventual RSVP admin page show it. Pass it as `pluginId` to `fetchPublicFeed`, and as `EVENTUAL_PLUGIN_ID` to the showcase. Install the backend one way only, from the Registry or from the config: the [developer guide](./docs/developer-guide.md#installation-and-plugin-id) explains what goes wrong otherwise, and [what to do before moving a site to the Registry](./docs/developer-guide.md#moving-a-site-from-the-config-to-the-registry).
 
 The [developer guide](./docs/developer-guide.md) covers public JSON/ICS/image routes, SSR dispatch, tool names, settings, transfer formats, permissions and sandbox limits. It also explains installing the matching npm helpers. Eventual RSVP's MCP tools inspect native data; native edits and publication use EmDash's core tools.
 
@@ -134,7 +134,7 @@ The backend shares EmDash's fixed sandbox RPC budget. Large feeds and migrations
 - [Install and connect](./docs/collection-setup.md) — administrators and schema setup.
 - [Upgrade and migrate](./docs/upgrade-0.13.0.md) — existing sites and old plugin data.
 - [Developer guide](./docs/developer-guide.md) — integration and API reference.
-- [Changelog](./CHANGELOG.md) · [0.18.5 release notes](./docs/release-notes-0.18.5.md) · [0.15.0 cache integration](./docs/release-notes-0.15.0.md) · [0.14.0 native collections](./docs/release-notes-0.14.0.md).
+- [Changelog](./CHANGELOG.md) · [0.18.6 release notes](./docs/release-notes-0.18.6.md) · [0.18.5 release notes](./docs/release-notes-0.18.5.md) · [0.15.0 cache integration](./docs/release-notes-0.15.0.md) · [0.14.0 native collections](./docs/release-notes-0.14.0.md).
 - [Astro showcase](./examples/astro-events/README.md) — optional visitor pages.
 - [Release evidence and older records](./docs/history.md).
 

@@ -1,6 +1,6 @@
 # Install and connect Eventual RSVP – Core
 
-Eventual RSVP – Core requires EmDash **>=1.2.0 <2.0.0**; it is tested on **1.2.0**, **1.4.0** and **1.5.0**, with 1.4.0 or newer recommended for the form and Cloudflare fixes. Editors can use the [event guide](user-guide.md) once an administrator completes this setup.
+Eventual RSVP – Core requires EmDash **>=1.2.0 <2.0.0**; it is tested on **1.2.0**, **1.4.0**, **1.5.0** and **1.6.0**, with 1.4.0 or newer recommended for the form and Cloudflare fixes. Editors can use the [event guide](user-guide.md) once an administrator completes this setup.
 
 ## In the EmDash admin
 
@@ -28,7 +28,7 @@ To make old entries editable, follow [upgrading and migration](upgrade-0.13.0.md
 
 ## For the site builder
 
-**Install the backend one way only**: from the Registry as above, or from npm in `astro.config.mjs`, not both. A Registry install is addressed by a generated plugin ID that starts with `r_`, not by `eventual`; the **Subscribe** links on the Eventual RSVP admin page show the exact addresses. The helpers are on npm as `@vermeulen.solutions/eventual` (the unscoped package `eventual` is unrelated; do not install it). Details: [versions, plugin ID and backends](developer-guide.md#versions-and-where-to-get-them).
+**Install the backend one way only**: from the Registry as above, or from npm in `astro.config.mjs`, not both. A Registry install is addressed by a generated plugin ID that starts with `r_`, not by `eventual`; the **Subscribe** links on the Eventual RSVP admin page show the exact addresses. The helpers are on npm as `@vermeulen.solutions/eventual` (the unscoped package `eventual` is unrelated; do not install it). Details: [versions, plugin ID and backends](developer-guide.md#versions-and-where-to-get-them). Moving an existing site from the config to the Registry? Read [what stays behind](developer-guide.md#moving-a-site-from-the-config-to-the-registry) first: calendar subscribers' address changes.
 
 After `npm ci` and `npm run build` in this repository, using Node 24+:
 

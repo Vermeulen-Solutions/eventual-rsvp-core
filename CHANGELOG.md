@@ -2,6 +2,12 @@
 
 All notable changes to Eventual RSVP – Core (formerly Eventual) are documented here.
 
+## 0.18.6 - 2026-11-25
+
+- **Tested on EmDash 1.6.0.** The source installer no longer warns on EmDash, Admin or Block Kit 1.6.0, and both of its admin adapters apply to the 1.6 builds. The browser acceptance passes on a fresh 1.6.0 site with the sandbox runner 0.9.8; its panel-save check now reads the newest notice, because 1.6 keeps the previous one on screen.
+- **Moving a site from the config to the Registry:** the developer guide says what stays behind under the old plugin ID (settings, calendar subscribers' address, calendar update counters, old events stored inside the plugin) and what to do before the move. The setup guide and README point to it.
+- No runtime, permission or schema changes; the Registry bundle is unchanged apart from its version.
+
 ## 0.18.5 - 2026-11-24
 
 - **Registry installs: links now use the installed plugin ID.** A plugin installed from the EmDash Registry is addressed by a generated ID that starts with `r_`, not by `eventual`. Two links still used `eventual` and answered "Plugin route not found" on those sites: the **Subscribe** links on the Eventual RSVP admin page (calendar subscription and JSON feed), and the per-event `.ics` link in the public feed's `calendarLinks`. Both now use the installed ID. Config-managed installs keep `eventual`. ([#7](https://github.com/Vermeulen-Solutions/eventual-rsvp-core/issues/7))

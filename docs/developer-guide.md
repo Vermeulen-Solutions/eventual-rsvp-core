@@ -49,9 +49,23 @@ Since 0.18.5 every link Eventual builds itself (the admin's Subscribe links and 
 - Both run their checks when an event is saved, so one save can be handled twice.
 - The admin shows two sets of Eventual pages, and the site has two feeds at two addresses.
 
-To switch from one to the other, remove the first, install the second, and select the collections again under **Event settings**. Events, venues and organizers live in EmDash collections and stay as they are. What the plugin keeps for itself does not carry over: its settings, old events still stored inside the plugin (from before 0.13), and the calendar subscription state (update counters and cancelled dates). The source installer (`emdashWithEventual`) stops the build when it finds the backend listed twice in the config; it cannot see a Registry install.
+The source installer (`emdashWithEventual`) stops the build when it finds the backend listed twice in the config; it cannot see a Registry install.
 
-Source tooling needs Node 24+. Peer ranges are in [package.json](../package.json); release acceptance uses EmDash/Admin/Block Kit **1.2.0 and 1.4.0**, Astro 7.3.x/7.4.x and React 19. The source `@vermeulen.solutions/eventual/install` lane is tested on 1.2.0, 1.4.0 and 1.5.0. It refuses only hosts older than 1.2.0; a newer untested host builds with a warning, and an editor adapter that no longer matches the admin build steps aside (with a warning) so EmDash's own editor is used. Registry installs never execute that transform.
+### Moving a site from the config to the Registry
+
+EmDash keeps each plugin's own data under its plugin ID. A Registry install has a new ID, so it starts empty, and what the old install stored stays behind under `eventual`. It is not deleted, but the new install cannot read it. Events, venues and organizers are EmDash content and are not affected.
+
+What stays behind, and what to do:
+
+- **Settings.** Select the collections again under **Event settings** (or with the `updateSettings` tool), and set the default time zone again.
+- **Calendar subscribers.** The subscription address contains the plugin ID. Anyone subscribed to `/_emdash/api/plugins/eventual/calendar` gets "not found" once the old install is removed, and their calendar app stops updating without telling them. Update the links on your pages before the move, and tell regular subscribers the new address, or keep the old address working with a redirect on your site.
+- **Calendar state.** Update counters (`SEQUENCE`) start again from 0, and cancellations already sent are not sent again. Calendar apps that re-read the subscription are not affected; an event a visitor imported as a single `.ics` file may not update.
+- **Old events stored inside the plugin** (from before 0.13): migrate them to a collection first, as in [upgrading](upgrade-0.13.0.md).
+
+Registrations and Tickets keep much more under their own IDs (registrations, orders, signing keys, payment settings). Read their guides before moving them.
+
+
+Source tooling needs Node 24+. Peer ranges are in [package.json](../package.json); release acceptance uses EmDash/Admin/Block Kit **1.2.0 and 1.4.0**, Astro 7.3.x/7.4.x and React 19. The source `@vermeulen.solutions/eventual/install` lane is tested on 1.2.0, 1.4.0, 1.5.0 and 1.6.0. It refuses only hosts older than 1.2.0; a newer untested host builds with a warning, and an editor adapter that no longer matches the admin build steps aside (with a warning) so EmDash's own editor is used. Registry installs never execute that transform.
 
 | Host | Status | Notes |
 | --- | --- | --- |
@@ -59,6 +73,7 @@ Source tooling needs Node 24+. Peer ranges are in [package.json](../package.json
 | 1.3.x | supported, untested | Same form/Cloudflare limitations; includes the plugin-storage cursor fix. |
 | 1.4.x | supported, full acceptance | Recommended. Fixes nested Block Kit forms and Cloudflare plugin mutations. |
 | 1.5.x | supported, host-tested | 1.5.0 passes the native-site and plugin integration suites; the admin adapter recognises its editor panel. |
+| 1.6.x | supported, host-tested | 1.6.0 passes the browser acceptance on a fresh site with the sandbox runner 0.9.8; both admin adapters apply to its builds. |
 | newer | allowed with a warning | Not yet tested. Check the event editor after upgrading. |
 
 ## Public routes

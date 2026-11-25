@@ -9,9 +9,9 @@ export { warnOnce };
 
 const require = createRequire(import.meta.url);
 export const testedVersions = Object.freeze({
-  emdash: Object.freeze(["1.2.0", "1.4.0", "1.5.0"]),
-  "@emdash-cms/admin": Object.freeze(["1.2.0", "1.4.0", "1.5.0"]),
-  "@emdash-cms/blocks": Object.freeze(["1.2.0", "1.4.0", "1.5.0"]),
+  emdash: Object.freeze(["1.2.0", "1.4.0", "1.5.0", "1.6.0"]),
+  "@emdash-cms/admin": Object.freeze(["1.2.0", "1.4.0", "1.5.0", "1.6.0"]),
+  "@emdash-cms/blocks": Object.freeze(["1.2.0", "1.4.0", "1.5.0", "1.6.0"]),
 });
 export const testedToolchain = Object.freeze({astro:"7.3.x-7.4.x (>=7.3.2 <7.5.0)",vite:"8.3.x",react:"19.x"});
 export function installedVersion(name, resolver = require) {
