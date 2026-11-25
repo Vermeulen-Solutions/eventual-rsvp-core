@@ -269,12 +269,13 @@ export async function handleContentBeforeUnpublish(
 export async function handleContentBeforeDelete(
   event: ContentDeleteEvent,
   ctx: PluginContext,
-): Promise<void> {
+): Promise<boolean | void> {
   ctx = withInvocationBudget(ctx);
   if (event.collection === await eventCollectionName(ctx)) {
     await reconcileNativeCalendar(ctx);
     return;
   }
-  const reason = await dependencyReason(event.collection, event.id, ctx);
-  if (reason) reject(reason);
+  // EmDash's delete hook takes no reason: false blocks the delete with its own message, a throw
+  // shows the editor an error page.
+  if (await dependencyReason(event.collection, event.id, ctx)) return false;
 }

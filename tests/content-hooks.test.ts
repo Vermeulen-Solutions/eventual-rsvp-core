@@ -207,12 +207,13 @@ describe("Native content validation", () => {
       },
     } as unknown as PluginContext;
 
+    // EmDash's delete hook takes no reason: false blocks the delete without an error page.
     await expect(
       handleContentBeforeDelete(
         { collection: "venues", id: "venue-1", permanent: false },
         ctx,
       ),
-    ).rejects.toThrow('used by published or scheduled event "Concert"');
+    ).resolves.toBe(false);
   });
 
   it("blocks unpublishing a venue referenced by a published event", async () => {

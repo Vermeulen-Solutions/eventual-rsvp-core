@@ -29,6 +29,20 @@ describe('Configurable native collections',{timeout:60_000},()=>{
    schema.fields.find(item=>item.slug==='timezone')!.translatable=true;
    await expect(saveCollectionBindings(ctx,bindings)).rejects.toThrow('translatable');
  });
+ it('offers only collections that fit, and says what is missing when none does',async()=>{
+  h=await createPluginRuntimeTestHost({site:{url:'https://audit.example.com',locale:'fr'},i18n:{defaultLocale:'fr',locales:['fr','en']}});
+  await h.fixtures.collection({slug:'notes',label:'Notes',fields:[{slug:'title',label:'Title',type:'string',translatable:true}]} as any);
+  const admin=await h.fixtures.user({email:'fit-admin@example.com',role:'admin',emailVerified:true});
+  const options=(page:unknown)=>(page as any).blocks.find((block:any)=>block.type==='form').fields.map((field:any)=>field.options.map((option:any)=>option.value));
+  let page=await h.admin.loadPage('/settings',{user:admin});
+  expect(JSON.stringify(page)).toContain('Apply the event blueprint first.');
+  // Notes has a title, so it may hold venues or organizers, but it is no event collection.
+  expect(options(page)).toEqual([[''],['','notes'],['','notes']]);
+  await h.fixtures.collection(createEventsCollectionBlueprint({eventCollection:'activities',venueCollection:'locations',organizerCollection:'hosts'}) as any);
+  page=await h.admin.loadPage('/settings',{user:admin});
+  expect(JSON.stringify(page)).not.toContain('Apply the event blueprint first.');
+  expect(options(page)[0]).toEqual(['','activities']);
+ });
  it('connects settings, feeds, MCP and the native panel to nonstandard collections',async()=>{
   const host=await setup();
   const admin=await host.fixtures.user({email:'bindings-admin@example.com',role:'admin',emailVerified:true});
@@ -51,7 +65,7 @@ describe('Configurable native collections',{timeout:60_000},()=>{
   expect((await host.actions.content.delete('locations','hall')).success).toBe(false);
   const workspace=await host.admin.loadPage('/events',{user:admin});
   expect(validateBlockResponse(workspace,{}).valid).toBe(true);
-  expect(JSON.stringify(workspace)).toContain('/content/activities/');
+  expect(JSON.stringify(workspace)).toContain('"kind":"content","collection":"activities"');
   const editor=await host.fixtures.user({email:'bindings-editor@example.com',role:'editor',emailVerified:true});
   await host.admin.submit('/settings','save-settings',{events:'events',venues:'venues',organizers:'organizers',defaultTimezone:'UTC'},{user:editor,blockId:'collection-settings'});
   expect((await host.transport.invokeRoute('mcp/settings/get',{})) as any).toMatchObject({collections:bindings});

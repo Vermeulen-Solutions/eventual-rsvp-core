@@ -50,6 +50,16 @@ describe("buildCalendarLinks", () => {
     expect(links.outlook).toContain("enddt=2026-11-23");
   });
 
+  it("gives calendars readable text for a rich-text description", () => {
+    // Native events keep their description as Portable Text, stored as JSON.
+    const description = JSON.stringify([{ _type: "block", _key: "a", style: "normal", markDefs: [], children: [{ _type: "span", _key: "b", text: "Bring a chair.", marks: ["strong"] }] }]);
+    const links = buildCalendarLinks({ id: "evt-rich", title: "Picnic", description, start: "2026-11-15T10:00:00Z", end: "2026-11-15T12:00:00Z", allDay: false });
+    for (const link of [links.google, links.outlook, links.office365]) {
+      expect(link).toContain(encodeURIComponent("Bring a chair."));
+      expect(link).not.toContain(encodeURIComponent("_type"));
+    }
+  });
+
   it("formats virtual and hybrid event locations cleanly", () => {
     const virtualLinks = buildCalendarLinks({
       id: "evt-zoom",

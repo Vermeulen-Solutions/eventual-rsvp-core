@@ -16,6 +16,12 @@ import { EventScanLimitError } from "./storage";
 import { handleContentBeforeSave, handleContentBeforeDelete, handleContentBeforePublish, handleContentBeforeUnpublish } from "./hooks/content-hooks";
 import { SandboxBudgetError } from './domain/invocation-budget';
 
+// Admin links point at the site the editor is on: a staging or local copy keeps its own links,
+// while the production host keeps the configured address (and its https behind a proxy).
+const adminOrigin = (site: string, request: string) => {
+	const origin = new URL(request).origin;
+	try { return site && new URL(site).host === new URL(origin).host ? site : origin; } catch { return origin; }
+};
 const unavailable = (error: Error) => plain(503, error.message, {'retry-after':'60'});
 
 /** Localize after the handler, with whatever RPC budget the handler left (shared counter). */
@@ -40,7 +46,7 @@ const plugin: SandboxedPlugin = {
 		...transferRoutes,
 		admin: {
 			permission: "content:edit_any",
-            handler: async (routeCtx, ctx) => localized(ctx as EventualContext, routeCtx.ui?.locale, budgeted => handleAdmin(routeCtx.input, {...budgeted,site:{...budgeted.site,url:budgeted.site.url || new URL(routeCtx.request.url).origin}} as never, routeCtx.user)),
+            handler: async (routeCtx, ctx) => localized(ctx as EventualContext, routeCtx.ui?.locale, budgeted => handleAdmin(routeCtx.input, {...budgeted,site:{...budgeted.site,url:adminOrigin(budgeted.site.url, routeCtx.request.url)}} as never, routeCtx.user)),
 		},
 		"admin/editor/schedule": {
 			permission: "content:edit_any",

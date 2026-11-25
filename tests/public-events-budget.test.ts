@@ -85,7 +85,8 @@ describe('publicEvents canonical URL budget', () => {
     const linked = result.events!.filter(event => event.publicUrl);
     expect(linked.length).toBeGreaterThan(0);
     expect(linked.every(event => event.publicUrl === 'https://club.example/2026/' + event.slug)).toBe(true);
-    expect(calls.length).toBeLessThanOrEqual(10);
+    // The public feeds may use 30 calls (EmDash 1.5+ on Cloudflare; no limit on Node).
+    expect(calls.length).toBeLessThanOrEqual(30);
   });
 
   it.each([undefined, false, 'false', true, 'true'])('preserves strict locale selection for strict=%s', async strict => {

@@ -48,6 +48,8 @@ export interface SchemaBlueprintOptions {
   bindRelations?: boolean;
   /** Opt in only when importing private-storage records from older prototypes. */
   legacyCompatibility?: boolean;
+  /** Time zone new events start in (IANA name). Default Europe/Zurich, for existing callers. */
+  defaultTimezone?: string;
 }
 function field(
   slug: string,
@@ -137,7 +139,7 @@ export function createEventsCollectionBlueprint(
       field("start_date", "string"),
       field("end_date", "string"),
       field("all_day", "boolean", false, { defaultValue: false }),
-      field("timezone", "string", false, { defaultValue: "Europe/Zurich" }),
+      field("timezone", "string", false, { defaultValue: options.defaultTimezone ?? "Europe/Zurich" }),
       field("location_type", "select", false, {
         widget: "eventual-editor:location-type",
         defaultValue: "physical",

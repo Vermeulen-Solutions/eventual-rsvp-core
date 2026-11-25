@@ -77,7 +77,7 @@ export function createEventsCollectionBlueprint(options = {}) {
             field("start_date", "string"),
             field("end_date", "string"),
             field("all_day", "boolean", false, { defaultValue: false }),
-            field("timezone", "string", false, { defaultValue: "Europe/Zurich" }),
+            field("timezone", "string", false, { defaultValue: options.defaultTimezone ?? "Europe/Zurich" }),
             field("location_type", "select", false, {
                 widget: "eventual-editor:location-type",
                 defaultValue: "physical",

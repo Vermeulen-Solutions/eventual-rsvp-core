@@ -33,6 +33,8 @@ export interface SchemaBlueprintOptions {
     bindRelations?: boolean;
     /** Opt in only when importing private-storage records from older prototypes. */
     legacyCompatibility?: boolean;
+    /** Time zone new events start in (IANA name). Default Europe/Zurich, for existing callers. */
+    defaultTimezone?: string;
 }
 export declare function createEventsCollectionBlueprint(options?: SchemaBlueprintOptions): CollectionBlueprint;
 export declare function createVenuesCollectionBlueprint(options?: SchemaBlueprintOptions): CollectionBlueprint;

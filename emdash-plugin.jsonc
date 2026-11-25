@@ -64,8 +64,6 @@
 		],
 		"pages": [
 			{ "path": "/events", "label": "Eventual RSVP", "icon": "calendar" },
-			{ "path": "/venues", "label": "Venues", "icon": "map-pin" },
-			{ "path": "/organizers", "label": "Organizers", "icon": "users" },
 			{ "path": "/settings", "label": "Event settings", "icon": "settings" }
 		],
 		"editorPanels": [

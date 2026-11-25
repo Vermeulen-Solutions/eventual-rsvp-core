@@ -8,8 +8,7 @@ import {isValidTimeZone} from './domain/date-time';
 import {withInvocationBudget} from './domain/invocation-budget';
 
 const context=(text:string):BlockResponse['blocks'][number]=>({type:'context',text});
-const nav=():BlockResponse['blocks'][number]=>({type:'actions',elements:[['/events','Events'],['/venues','Venues'],['/organizers','Organizers'],['/settings','Settings']].map(([path,label])=>({type:'button',action_id:'open-page:'+path,label,value:path}))});
-const collectionLink=(ctx:EventualContext,slug:string,label:string):BlockResponse['blocks'][number]=>({type:'actions',elements:[{type:'link',label,target:{kind:'external',url:new URL('/_emdash/admin/content/'+encodeURIComponent(slug),ctx.site.url).href}}]});
+const nav=():BlockResponse['blocks'][number]=>({type:'actions',elements:[['/events','Events'],['/settings','Settings']].map(([path,label])=>({type:'button',action_id:'open-page:'+path,label,value:path}))});
 
 async function settings(ctx:EventualContext,error?:string):Promise<BlockResponse> {
   // This page repairs removed/broken bindings; do not resolve them first.
@@ -18,10 +17,12 @@ async function settings(ctx:EventualContext,error?:string):Promise<BlockResponse
   const schemas=await collectionSchemas(ctx);
   const defaultEvents=schemas.find(item=>item.slug==='events');
   const target=(field:string,fallback:string)=>String(defaultEvents?.fields.find(item=>item.slug===field)?.options?.collection ?? fallback);
+  // Offer only collections that can work (an event schedule; a name or title), and the current choice so it can be repaired.
+  const fits=(key:keyof CollectionBindings,item:typeof schemas[number])=>item.slug===selected?.[key] || item.fields.some(field=>key==='events'?field.slug==='start':['name','title'].includes(field.slug)&&field.type==='string');
   const choose=(key:keyof CollectionBindings,label:string):FormField=>({type:'select',action_id:key,label,
-    options:[{value:'',label:key==='events'?'Choose a collection':'No collection'},...schemas.map(item=>({value:item.slug,label:(item.label || item.slug)+' ('+item.slug+')'}))],
+    options:[{value:'',label:key==='events'?'Choose a collection':'No collection'},...schemas.filter(item=>fits(key,item)).map(item=>({value:item.slug,label:(item.label || item.slug)+' ('+item.slug+')'}))],
     initial_value:selected?.[key] ?? (key==='events' ? defaultEvents?.slug ?? '' : schemas.some(item=>item.slug===target(key==='venues'?'venue':'organizer_ref',key))?target(key==='venues'?'venue':'organizer_ref',key):'')});
-  return {blocks:[nav(),{type:'header',text:'Settings'},context('Choose content types.'),
+  return {blocks:[nav(),{type:'header',text:'Settings'},context(schemas.some(item=>fits('events',item))?'Choose content types.':'Event collection needs start (datetime). Apply the event blueprint first.'),
     ...(error ? [{type:'banner' as const,title:'Settings not saved',description:error,variant:'error' as const}] : []),
     {type:'form',block_id:'collection-settings:'+Object.values(selected ?? {}).join(':'),fields:[choose('events','Event collection'),choose('venues','Venue collection'),choose('organizers','Organizer collection')],submit:{action_id:'save-settings',label:'Save settings'}},
     {type:'form',block_id:'legacy-reads:'+legacyReads,fields:[{type:'toggle',action_id:'legacyReads',label:'Show old events saved inside the plugin',description:'Enable to serve old plugin events.',initial_value:legacyReads}],submit:{action_id:'save-legacy-reads',label:'Save switch'}},
@@ -60,10 +61,6 @@ export async function handleAdmin(input:unknown,ctx:EventualContext,user?:Sandbo
     if(!bindings.schema) {
       const legacyReads=await legacyReadsEnabled(ctx);
       return {blocks:[nav(),{type:'header',text:'Connect events to a content type'},context('Choose an event content type.'),context(legacyReads?'Public calendars show old plugin events.':'Turn on "Show old events saved inside the plugin" in settings if needed.'),context('You can copy the old events into a content type. See the setup guide.')]};
-    }
-    if(page==='/venues' || page==='/organizers') {
-      const slug=page==='/venues'?bindings.venues:bindings.organizers;
-      return {blocks:[nav(),context('Create and edit these entries in the EmDash content editor.'),...(slug?[collectionLink(ctx,slug,page==='/venues'?'Manage venues':'Manage organizers')]:[context('No collection selected. Ask an administrator to configure it in Event settings.')])]};
     }
     return {blocks:[nav(),...(await nativeWorkspace(request,ctx,user)).blocks]};
   } catch(error) {return {blocks:[nav(),{type:'banner',title:'Review collection settings',description:error instanceof Error?error.message:'Collections could not be loaded.',variant:'error'}]};}

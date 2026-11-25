@@ -601,7 +601,8 @@ describe("Native modernization through the EmDash production runtime", {timeout:
       type: "page_load",
       page: "/events",
     })) as any;
-    expect(JSON.stringify(page)).toContain("/_emdash/admin/content/events/");
+    // Entry links open through the admin's router on the site in use, not the public domain.
+    expect(JSON.stringify(page)).toContain('"target":{"kind":"content","collection":"events","id":');
     expect(JSON.stringify(page)).not.toContain("save-event");
     expect(
       await h.transport.invokeRoute("mcp/events/create", {

@@ -12,6 +12,9 @@ import { categoryKey } from "./category";
 import type { CalendarCancellation, EventualContext } from "../storage";
 import { reserveRpcCalls } from './invocation-budget';
 
+/** Hex SHA-256 of a text. */
+export const sha256 = async (text: string) => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))), byte => byte.toString(16).padStart(2, '0')).join('');
+
 interface CalendarState {
   from?: string;
   locales?: string[];
@@ -102,15 +105,21 @@ export async function reconcileNativeCalendar(ctx: EventualContext): Promise<{
       const rows = (groups.get(key) ?? []).sort((a, b) =>
         a.id.localeCompare(b.id),
       );
-      const fingerprint = JSON.stringify(
+      const content = JSON.stringify(
         [ctx.site, source.schema?.urlPattern, source.schema?.routable, rows.map((row) => ({
           ...row,
           calendarSequence: undefined,
           venue: localizedVenue(venues, row),
         }))],
       );
+      // The snapshot keeps a SHA-256 of each group, not the group itself: the full text made a
+      // year of one-off events outgrow the 1 MiB snapshot at about 500 events. Snapshots written
+      // before 0.18.7 still hold the text; it counts as unchanged and is replaced by its hash.
+      const fingerprint = await sha256(content);
       const cache = cached.get(key);
-      if (cache?.fingerprint === fingerprint && cache.from === from) {
+      const same = cache?.fingerprint === fingerprint || cache?.fingerprint === content;
+      if (same && cache!.from === from) {
+        if (cache!.fingerprint !== fingerprint) { next.set(key, { ...cache!, fingerprint }); changedSnapshot = true; }
         occurrenceCount += cache.occurrences.length;
         if (occurrenceCount > 10000)
           reject("Calendar occurrence limit exceeded.");
@@ -122,7 +131,7 @@ export async function reconcileNativeCalendar(ctx: EventualContext): Promise<{
           reject("Calendar cancellation limit exceeded.");
         continue;
       }
-      const changed = cache?.fingerprint !== fingerprint;
+      const changed = !same;
       const sequence = cache
         ? cache.sequence + (changed ? 1 : 0)
         : rows.some((row) => row.calendarUid)

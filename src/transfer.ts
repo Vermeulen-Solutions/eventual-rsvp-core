@@ -16,6 +16,7 @@ import {
   type MigrateToNativeOptions,
 } from "./domain/migration";
 import { nativeSchema } from "./domain/native-source";
+import { sha256 } from "./domain/native-calendar";
 import { referenceTarget } from "./domain/native-references";
 import { withInvocationBudget, remainingRpcCalls } from './domain/invocation-budget';
 
@@ -33,11 +34,7 @@ export async function transferId(
   collection: Collection,
   id: string,
 ): Promise<string> {
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(JSON.stringify([source, collection, id])),
-  );
-  return `import-${Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("")}`;
+  return `import-${await sha256(JSON.stringify([source, collection, id]))}`;
 }
 
 function validTimestamp(value: string): boolean {

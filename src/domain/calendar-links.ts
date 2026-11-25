@@ -1,4 +1,5 @@
 import { safeHttpUrl } from "./venue";
+import { portableTextToPlainText } from "./portable-text";
 export interface CalendarLinks {
 	google: string;
 	outlook: string;
@@ -29,7 +30,8 @@ export interface CalendarEventInput {
 export function buildCalendarLinks(event: CalendarEventInput, siteUrl = "", pluginId = "eventual"): CalendarLinks {
 	const title = event.title || "Event";
 	const onlineUrl = safeHttpUrl(event.virtualUrl ?? "");
-	const details = [event.description || "", onlineUrl].filter(Boolean).join("\n\n");
+	// Native descriptions are Portable Text (stored as JSON): calendars get readable text.
+	const details = [portableTextToPlainText(event.description ?? ""), onlineUrl].filter(Boolean).join("\n\n");
 	
 	let loc = event.location || "";
 	if (event.locationType === "virtual") {

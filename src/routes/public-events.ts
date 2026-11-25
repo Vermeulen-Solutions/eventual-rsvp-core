@@ -15,7 +15,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 export async function handlePublicEvents(input: unknown, ctx: EventualContext) {
-  try { return await readPublicEvents(input, withInvocationBudget(ctx)); }
+  try { return await readPublicEvents(input, withInvocationBudget(ctx, 30)); }
   catch (error) { if (error instanceof SandboxBudgetError) return {ok:false,error:'SANDBOX_BUDGET_EXCEEDED',details:error.message,events:undefined}; throw error; }
 }
 async function readPublicEvents(input: unknown, ctx: EventualContext) {

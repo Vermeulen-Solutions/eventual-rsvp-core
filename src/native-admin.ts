@@ -14,6 +14,8 @@ export async function handleAdmin(input:unknown,ctx:EventualContext,user?:Sandbo
  const request=input as Record<string,unknown>,schema=await nativeSchema(ctx);
  if(!schema) return {blocks:[{type:'context',text:'Choose an event collection in Event settings.'}]};
  const link=(path:string,label:string)=>({type:'link' as const,label,target:{kind:'external' as const,url:new URL(path,ctx.site.url).href}});
+ // Entries open through the admin's own router, on the site in use rather than the public domain.
+ const openEntry=(id:string,label:string)=>({type:'link' as const,label,target:{kind:'content' as const,collection:schema.slug,id}});
  const content='/_emdash/admin/content/'+encodeURIComponent(schema.slug);
  // Registry installs are addressed by a generated ID (r_…), not by the slug.
  const api='/_emdash/api/plugins/'+encodeURIComponent(ctx.plugin?.id || 'eventual')+'/';
@@ -29,17 +31,17 @@ export async function handleAdmin(input:unknown,ctx:EventualContext,user?:Sandbo
   const revision=entry.draftRevisionId?await ctx.content!.getRevision?.(schema.slug,entry.id,entry.draftRevisionId):undefined;
   const data=prepareNativeDuplicate(revision?.data ?? entry.data),allowed=new Set(schema.fields.filter(field=>!field.validation?.relation).map(field=>field.slug));
   const copied=await ctx.content!.create!(schema.slug,Object.fromEntries(Object.entries({...data,title:String(data.title ?? 'Event')+' (copy)'}).filter(([key])=>allowed.has(key))),{locale:entry.locale ?? undefined});
-  blocks.push({type:'context',text:'Draft copy created.'},{type:'actions',elements:[link(content+'/'+encodeURIComponent(copied.id),'Edit the copy')]});
+  blocks.push({type:'context',text:'Draft copy created.'},{type:'actions',elements:[openEntry(copied.id,'Edit the copy')]});
  } else if(request.action_id && !String(request.action_id).startsWith('page-native-events')) reject('Reload the workspace before trying this action.');
  const schemas=await collectionSchemas(ctx);
- blocks.push({type:'actions',elements:[link(content+'/new','Create event'),link(content,'All events'),...(['venue','organizer_ref'] as const).flatMap(field=>{
+ blocks.push({type:'actions',elements:[openEntry('new','Create event'),link(content,'All events'),...(['venue','organizer_ref'] as const).flatMap(field=>{
   const target=referenceTarget(schema,field);
   return schemas.some(item=>item.slug===target)?[link('/_emdash/admin/content/'+encodeURIComponent(target),field==='venue'?'Manage venues':'Manage organizers')]:[];
  })]});
  const cursor=String(request.action_id).startsWith('page-native-events')?String(request.value || ''):undefined;
  const page=await ctx.content!.list(schema.slug,{limit:20,cursor});
  blocks.push({type:'table',page_action_id:'page-native-events',columns:[{key:'title',label:'Event'},{key:'locale',label:'Language'},{key:'status',label:'Publication',format:'badge'},{key:'edit',label:'Edit',format:'element'},...(user?[{key:'copy',label:'Copy',format:'element' as const}]:[])],rows:page.items.map(entry=>({
-  title:String(entry.data.title || entry.slug),locale:entry.locale ?? '',status:entry.status,edit:link(content+'/'+encodeURIComponent(entry.id),'Edit'),...(user?{copy:{type:'button' as const,action_id:'duplicate-event',label:'Duplicate',value:entry.id}}:{})
+  title:String(entry.data.title || entry.slug),locale:entry.locale ?? '',status:entry.status,edit:openEntry(entry.id,'Edit'),...(user?{copy:{type:'button' as const,action_id:'duplicate-event',label:'Duplicate',value:entry.id}}:{})
  })),empty_text:'No events yet.'});
  if(page.hasMore && (!page.cursor || page.cursor===cursor)) reject('Incomplete event page. Reload the workspace.');
  const pages=[...(cursor?[{type:'button' as const,action_id:'page-native-events-first',label:'First page',value:''}]:[]),...(page.hasMore?[{type:'button' as const,action_id:'page-native-events-next',label:'Next events',value:page.cursor}]:[])];

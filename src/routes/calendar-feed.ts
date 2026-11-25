@@ -36,7 +36,7 @@ export async function handleCalendarFeed(
   host: string,
   options?: CalendarFeedOptions,
 ): Promise<string> {
-  ctx = withInvocationBudget(ctx);
+  ctx = withInvocationBudget(ctx, 30);
   const from = new Date().toISOString().slice(0, 10);
   const end = new Date(from + "T00:00:00Z");
   end.setUTCDate(end.getUTCDate() + 365);

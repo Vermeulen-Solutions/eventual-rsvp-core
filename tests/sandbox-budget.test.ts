@@ -49,6 +49,16 @@ describe('Sandbox invocation accounting and bounded reads',()=>{
     await Promise.allSettled([ctx.kv.get('x'),ctx.kv.get('x')]);
     expect(get).toHaveBeenCalledTimes(10);
   });
+  it('keeps a short hash per calendar group, and an unchanged feed keeps its sequences',async()=>{
+    const {ctx,kv} = tracedContext(Array.from({length:3},(_,i)=>row('event-'+i)));
+    const first = await handleCalendarFeed(ctx,'example.org');
+    const snapshot:any = await kv.get('state:eventual-calendar-snapshot');
+    for (const group of Object.values(snapshot.groups) as any[]) expect(group.fingerprint).toMatch(/^[0-9a-f]{64}$/);
+    const again = tracedContext(Array.from({length:3},(_,i)=>row('event-'+i)));
+    await again.kv.set('state:eventual-calendar-snapshot',snapshot);
+    const second = await handleCalendarFeed(again.ctx,'example.org');
+    expect(second.match(/SEQUENCE:\d+/g)).toEqual(first.match(/SEQUENCE:\d+/g));
+  });
   it('reconciles 50 cold calendar groups with one conditional write and at most eight calls',async()=>{
     const {ctx,calls} = tracedContext(Array.from({length:50},(_,i)=>row('event-'+i)));
     const result = await handleCalendarFeed(ctx,'example.org');
@@ -69,6 +79,14 @@ describe('Sandbox invocation accounting and bounded reads',()=>{
     expect(feed).toContain('first@example.org');
     expect(await old.kv.get('state:eventual-calendar:first')).toBeTruthy();
   });
+  it('gives the read-only public feeds 30 calls and every other route 10',()=>{
+    const ctx={kv:memoryKv()} as unknown as EventualContext;
+    expect(remainingRpcCalls(withInvocationBudget({...ctx}))).toBe(10);
+    expect(remainingRpcCalls(withInvocationBudget({...ctx},30))).toBe(30);
+    // An already counted context keeps its own limit.
+    const counted=withInvocationBudget({...ctx});
+    expect(remainingRpcCalls(withInvocationBudget(counted,30))).toBe(10);
+  });
   it('links twenty events with one URL lookup per locale',async()=>{
     const {ctx,calls} = tracedContext(Array.from({length:20},(_,i)=>({...row('event-'+i),slug:'event-'+i})));
     ctx.content!.getPublicUrl = async(_c:string,id:string)=>{calls.push('content.getPublicUrl');return 'https://example.org/events/'+id;};
@@ -84,7 +102,7 @@ describe('Sandbox invocation accounting and bounded reads',()=>{
     const result = await handleCalendarFeed(ctx,'example.org');
     // Lookups stop before the budget runs out; the events beyond them are listed without a link.
     expect((result.match(/BEGIN:VEVENT/g) ?? []).length).toBe(20);
-    expect(calls.length).toBeLessThanOrEqual(10);
+    expect(calls.length).toBeLessThanOrEqual(30);
   });
   it('leaves the previous snapshot intact when a source scan cannot finish',async()=>{
     const {ctx,calls,kv} = tracedContext();
@@ -93,7 +111,7 @@ describe('Sandbox invocation accounting and bounded reads',()=>{
     let page = 0;
     ctx.content!.list = async()=>{calls.push('content.list');return {items:[],hasMore:true,cursor:String(++page)};};
     await expect(handleCalendarFeed(ctx,'example.org')).rejects.toThrow('sandbox RPC budget');
-    expect(calls.length).toBeLessThanOrEqual(10);
+    expect(calls.length).toBeLessThanOrEqual(30);
     expect(await kv.get('state:eventual-calendar-snapshot')).toEqual(previous);
     expect(calls).not.toContain('kv.compareAndSet');
   });

@@ -71,7 +71,7 @@ writeFileSync(
   join(work, "astro.config.mjs"),
   "import {defineConfig} from 'astro/config'; export default defineConfig({output:'static',site:'https://consumer.example'});\n",
 );
-writeFileSync(join(work,'verify-editor.mjs'),"import eventual from '@vermeulen.solutions/eventual'; import emdash from 'emdash/astro'; if(typeof emdash!=='function'||!eventual.adminPages.some(page=>page.path==='/venues'))throw Error('Self-contained descriptor failed'); emdash({sandboxed:[eventual]});");
+writeFileSync(join(work,'verify-editor.mjs'),"import eventual from '@vermeulen.solutions/eventual'; import emdash from 'emdash/astro'; if(typeof emdash!=='function'||!eventual.adminPages.some(page=>page.path==='/settings'))throw Error('Self-contained descriptor failed'); emdash({sandboxed:[eventual]});");
 run(join(work,'verify-editor.mjs'),[],work);
 const installedSchema=JSON.parse(run(join(work,"node_modules/@vermeulen.solutions/eventual/scripts/export-native-schema.mjs"),[],work));
 if(!installedSchema.collections.some(collection=>collection.slug === "events")) throw new Error("Installed schema CLI failed.");
