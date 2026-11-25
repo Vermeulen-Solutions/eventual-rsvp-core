@@ -9,6 +9,7 @@ import {
 	displayDate,
 	eventEndDate,
 	eventStartDate,
+	eventTimeParts,
 	eventTimeRange,
 	eventTouchesDate,
 	firstDayOfWeek,
@@ -92,6 +93,13 @@ describe("month grid", () => {
 		expect(eventTimeRange(timed, "en-GB")).toMatch(/CEST|GMT\+2|UTC\+2/);
 		expect(eventTimeRange(event({ allDay: true, start: "2026-10-10", end: "2026-10-10" }), "en-GB")).toBe("");
 		expect(displayDate("2026-10-10", "en-GB", "Europe/Paris", true)).toContain("10 Oct 2026");
+	});
+
+	it("splits a time range into start, end and zone, also for 12-hour locales", () => {
+		const timed = event({ start: "2026-10-10T16:00:00.000Z", end: "2026-10-10T17:30:00.000Z" });
+		expect(eventTimeParts(timed, "en-GB")).toMatchObject({ start: "18:00", end: "19:30" });
+		expect(eventTimeParts(timed, "en-US")?.start).toMatch(/^6:00\sPM$/);
+		expect(eventTimeParts(event({ allDay: true, start: "2026-10-10", end: "2026-10-10" }), "en-GB")).toBeNull();
 	});
 
 	it("validates month values and finds the current month in a time zone", () => {

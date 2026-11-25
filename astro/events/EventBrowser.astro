@@ -6,9 +6,11 @@
  */
 import type { EventBrowserData } from "./index";
 import { eventHref } from "./index";
-import { eventTimeRange } from "./grid";
+import { eventTimeParts } from "./grid";
 import AgendaItem from "./parts/AgendaItem.astro";
+import DateTile from "./parts/DateTile.astro";
 import EventCard from "./parts/EventCard.astro";
+import Icon from "./parts/Icon.astro";
 import StatusBadge from "./parts/StatusBadge.astro";
 import Styles from "./parts/Styles.astro";
 
@@ -37,6 +39,7 @@ const H3 = `h${headingLevel + 2}` as "h3";
 const level3 = headingLevel + 2;
 const fullDate = new Intl.DateTimeFormat(locale, { dateStyle: "full", timeZone: "UTC" });
 const count = data.events.length;
+const dots = (n: number) => Array.from({ length: Math.min(n, 3) });
 const filterCategories = state.category && !data.categories.includes(state.category) ? [state.category, ...data.categories] : data.categories;
 const viewHeading = state.view === "month" || state.view === "list" || state.view === "cards" || state.view === "dates"
 	? text.month.events(data.monthTitle)
@@ -46,10 +49,11 @@ const viewHeading = state.view === "month" || state.view === "list" || state.vie
 <Styles />
 <section id={id} class:list={["eventual-browser", className]} lang={data.lang} dir={data.dir} style={scheme ? `color-scheme: ${scheme}` : undefined} aria-labelledby={`${id}-title`}>
 	<header class="eventual-browser__header">
-		<div>
-			<H1 id={`${id}-title`} class="eventual-browser__title">{title ?? text.month.events(data.monthTitle)}</H1>
-			{intro !== false && <p class="eventual-browser__intro">{intro ?? text.intro}</p>}
-		</div>
+		<H1 id={`${id}-title`} class="eventual-browser__title">{title ?? text.month.events(data.monthTitle)}</H1>
+		{intro !== false && <p class="eventual-browser__intro">{intro ?? text.intro}</p>}
+	</header>
+
+	<div class="eventual-controls">
 		{showViewSwitch && data.views.length > 1 && (
 			<nav class="eventual-views" aria-label={text.views.label}>
 				<ul>
@@ -57,38 +61,35 @@ const viewHeading = state.view === "month" || state.view === "list" || state.vie
 				</ul>
 			</nav>
 		)}
-	</header>
-
-	<div class="eventual-toolbar">
-		<nav class="eventual-months" aria-label={text.month.navigation}>
-			<a class="eventual-button eventual-button--icon" href={data.previous.href}>
-				<svg viewBox="0 0 24 24" aria-hidden="true" class="eventual-flip"><path d="m15 18-6-6 6-6" /></svg>
-				<span class="eventual-sr-only">{data.previous.label}</span>
-			</a>
-			<a class="eventual-button" href={data.current.href} aria-current={data.current.isCurrent ? "date" : undefined}>{data.current.label}</a>
-			<a class="eventual-button eventual-button--icon" href={data.next.href}>
-				<svg viewBox="0 0 24 24" aria-hidden="true" class="eventual-flip"><path d="m9 18 6-6-6-6" /></svg>
-				<span class="eventual-sr-only">{data.next.label}</span>
-			</a>
-		</nav>
-		{showFilter && (
-			<form method="get" class="eventual-filter">
-				<input type="hidden" name="month" value={state.month} />
-				<input type="hidden" name="view" value={state.view} />
-				<label for={`${id}-category`}>{text.filter.label}</label>
-				<select id={`${id}-category`} name="category">
-					<option value="">{text.filter.all}</option>
-					{filterCategories.map((category) => <option value={category} selected={category === state.category}>{category}</option>)}
-				</select>
-				<button type="submit" class="eventual-button eventual-button--primary">{text.filter.apply}</button>
-			</form>
-		)}
+		<div class="eventual-toolbar">
+			<nav class="eventual-months" aria-label={text.month.navigation}>
+				<span class="eventual-months__step">
+					<a class="eventual-button eventual-button--icon" href={data.previous.href}><Icon name="chevron-left" /><span class="eventual-sr-only">{data.previous.label}</span></a>
+					<a class="eventual-button eventual-button--icon" href={data.next.href}><Icon name="chevron-right" /><span class="eventual-sr-only">{data.next.label}</span></a>
+				</span>
+				<a class="eventual-button" href={data.current.href} aria-current={data.current.isCurrent ? "date" : undefined}>{data.current.label}</a>
+			</nav>
+			{showFilter && (
+				<form method="get" class="eventual-filter">
+					<input type="hidden" name="month" value={state.month} />
+					<input type="hidden" name="view" value={state.view} />
+					<label for={`${id}-category`}>{text.filter.label}</label>
+					<span class="eventual-select">
+						<select id={`${id}-category`} name="category">
+							<option value="">{text.filter.all}</option>
+							{filterCategories.map((category) => <option value={category} selected={category === state.category}>{category}</option>)}
+						</select>
+						<Icon name="chevron-down" />
+					</span>
+					<button type="submit" class="eventual-button">{text.filter.apply}</button>
+				</form>
+			)}
+		</div>
+		<p class="eventual-summary">
+			<span>{text.count(count)}</span>
+			{state.category && <><span aria-hidden="true">·</span><span>{text.filter.active(state.category)}</span><a href={data.clearHref}>{text.filter.clear}</a></>}
+		</p>
 	</div>
-
-	<p class="eventual-summary">
-		<span>{text.count(count)}</span>
-		{state.category && <> · <span>{text.filter.active(state.category)}</span> · <a href={data.clearHref}>{text.filter.clear}</a></>}
-	</p>
 
 	{data.status === 502 ? (
 		<div class="eventual-notice eventual-notice--error" role="alert">
@@ -98,6 +99,7 @@ const viewHeading = state.view === "month" || state.view === "list" || state.vie
 		</div>
 	) : count === 0 ? (
 		<div class="eventual-notice">
+			<Icon name="calendar" class="eventual-notice__icon" />
 			<H2>{state.category ? text.notice.emptyFiltered : text.notice.empty}</H2>
 			{state.category && <p><a href={data.clearHref}>{text.filter.clear}</a></p>}
 		</div>
@@ -113,7 +115,15 @@ const viewHeading = state.view === "month" || state.view === "list" || state.vie
 
 			{state.view === "timeline" && (
 				<ol class="eventual-timeline">
-					{data.events.map((event) => <li><EventCard event={event} data={data} level={level3} variant="timeline" /></li>)}
+					{data.dateGroups.map((group) => (
+						<li class="eventual-timeline__day">
+							<H3 class="eventual-timeline__date"><DateTile date={group.date} locale={locale} labelled={false} /><span class="eventual-sr-only">{group.label}</span></H3>
+							<span class="eventual-timeline__dot" aria-hidden="true"></span>
+							<ul class="eventual-stack eventual-timeline__events">
+								{group.events.map((event) => <li><EventCard event={event} data={data} level={level3 + 1} variant="timeline" /></li>)}
+							</ul>
+						</li>
+					))}
 				</ol>
 			)}
 
@@ -128,8 +138,15 @@ const viewHeading = state.view === "month" || state.view === "list" || state.vie
 					{data.dateGroups.map((group, index) => (
 						<li>
 							<details class="eventual-day" open={index === 0}>
-								<summary><span class="eventual-day__label">{group.label}</span> <span class="eventual-day__count">{text.count(group.events.length)}</span></summary>
-								<ul class="eventual-stack">
+								<summary>
+									<DateTile date={group.date} locale={locale} layout="short" labelled={false} />
+									<span class="eventual-day__text">
+										<span class="eventual-day__label">{group.label}</span>
+										<span class="eventual-day__count">{text.count(group.events.length)}</span>
+									</span>
+									<Icon name="chevron-down" class="eventual-day__chevron" />
+								</summary>
+								<ul class="eventual-rows">
 									{group.events.map((event) => <li><AgendaItem event={event} data={data} level={level3} showDate={false} compact /></li>)}
 								</ul>
 							</details>
@@ -143,14 +160,25 @@ const viewHeading = state.view === "month" || state.view === "list" || state.vie
 					<nav class="eventual-datestrip" aria-label={text.dates.jump}>
 						<ul>
 							{data.dateGroups.map((group) => (
-								<li><a href={`#${group.id}`}><span aria-hidden="true">{group.weekday}</span><strong aria-hidden="true">{group.day}</strong><span class="eventual-sr-only">{group.label}</span></a></li>
+								<li>
+									<a href={`#${group.id}`}>
+										<span class="eventual-datestrip__weekday" aria-hidden="true">{group.weekday}</span>
+										<span class="eventual-datestrip__day" aria-hidden="true">{group.day}</span>
+										<span class="eventual-datestrip__dots" aria-hidden="true">{dots(group.events.length).map(() => <i></i>)}</span>
+										<span class="eventual-sr-only">{group.label}</span>
+									</a>
+								</li>
 							))}
 						</ul>
 					</nav>
 					{data.dateGroups.map((group) => (
-						<section class="eventual-dategroup" id={group.id} tabindex="-1" aria-labelledby={`${group.id}-title`}>
-							<H3 id={`${group.id}-title`}>{group.label}</H3>
-							<ul class="eventual-stack">
+						<section class="eventual-group" id={group.id} tabindex="-1" aria-labelledby={`${group.id}-title`}>
+							<header class="eventual-group__header">
+								<DateTile date={group.date} locale={locale} layout="short" labelled={false} />
+								<H3 id={`${group.id}-title`} class="eventual-group__title">{group.label}</H3>
+								<span class="eventual-group__count">{text.count(group.events.length)}</span>
+							</header>
+							<ul class="eventual-rows">
 								{group.events.map((event) => <li><AgendaItem event={event} data={data} level={level3 + 1} showDate={false} compact /></li>)}
 							</ul>
 						</section>
@@ -159,67 +187,75 @@ const viewHeading = state.view === "month" || state.view === "list" || state.vie
 			)}
 
 			{state.view === "locations" && data.locationGroups.map((group, index) => (
-				<section class="eventual-place" aria-labelledby={`${id}-place-${index}`}>
-					<header class="eventual-place__header">
-						<H3 id={`${id}-place-${index}`}>{group.location}</H3>
-						{group.directionsUrl && <a href={group.directionsUrl} target="_blank" rel="noopener noreferrer">{text.event.directions}<span class="eventual-sr-only"> {text.newTab}</span></a>}
+				<section class="eventual-group eventual-group--place" aria-labelledby={`${id}-place-${index}`}>
+					<header class="eventual-group__header">
+						<span class="eventual-group__icon"><Icon name="pin" /></span>
+						<H3 id={`${id}-place-${index}`} class="eventual-group__title">{group.location}</H3>
+						{group.directionsUrl
+							? <a class="eventual-group__link" href={group.directionsUrl} target="_blank" rel="noopener noreferrer">{text.event.directions}<Icon name="external" /><span class="eventual-sr-only"> {text.newTab}</span></a>
+							: <span class="eventual-group__count">{text.count(group.events.length)}</span>}
 					</header>
-					<ul class="eventual-stack">
-						{group.events.map((event) => <li><AgendaItem event={event} data={data} level={level3 + 1} compact /></li>)}
+					<ul class="eventual-rows">
+						{group.events.map((event) => <li><AgendaItem event={event} data={data} level={level3 + 1} compact showPlace={false} /></li>)}
 					</ul>
 				</section>
 			))}
 
 			{state.view === "month" && (
 				<>
-					<table class="eventual-month">
-						<caption class="eventual-sr-only">{viewHeading}</caption>
-						<thead>
-							<tr>{data.weekdays.short.map((day, index) => <th scope="col"><span aria-hidden="true">{day}</span><span class="eventual-sr-only">{data.weekdays.long[index]}</span></th>)}</tr>
-						</thead>
-						<tbody>
-							{data.weeks.map((week) => (
-								<tr>
-									{week.map((cell) => (
-										<td class:list={["eventual-month__day", !cell.inMonth && "eventual-month__day--outside", cell.date === data.today && "eventual-month__day--today"]}>
-											<time datetime={cell.date} aria-current={cell.date === data.today ? "date" : undefined}>
-												<span aria-hidden="true">{cell.dayNumber}</span><span class="eventual-sr-only">{fullDate.format(new Date(`${cell.date}T12:00:00Z`))}</span>
-											</time>
-											{cell.events.length > 0 && (
-												<ul class="eventual-month__events">
-													{cell.events.map((event) => (
-														<li class:list={[event.status === "cancelled" && "eventual-is-cancelled"]}>
-															<a href={eventHref(event, data)}>
-																<span class="eventual-month__time">{event.allDay ? text.event.allDay : eventTimeRange(event, locale).split(" ")[0]}</span>
-																<span class="eventual-month__name">{event.title}</span>
-															</a>
-															<StatusBadge event={event} text={text} locale={locale} />
-														</li>
-													))}
-												</ul>
-											)}
-										</td>
-									))}
-								</tr>
-							))}
-						</tbody>
-					</table>
-					<ul class="eventual-month-list eventual-stack" data-narrow-month>
+					<div class="eventual-month-frame">
+						<table class="eventual-month">
+							<caption class="eventual-sr-only">{viewHeading}</caption>
+							<thead>
+								<tr>{data.weekdays.short.map((day, index) => <th scope="col"><span aria-hidden="true">{day}</span><span class="eventual-sr-only">{data.weekdays.long[index]}</span></th>)}</tr>
+							</thead>
+							<tbody>
+								{data.weeks.map((week) => (
+									<tr>
+										{week.map((cell) => (
+											<td class:list={["eventual-month__day", !cell.inMonth && "eventual-month__day--outside", cell.date === data.today && "eventual-month__day--today"]}>
+												<time class="eventual-month__number" datetime={cell.date} aria-current={cell.date === data.today ? "date" : undefined}>
+													<span aria-hidden="true">{cell.dayNumber}</span><span class="eventual-sr-only">{fullDate.format(new Date(`${cell.date}T12:00:00Z`))}</span>
+												</time>
+												{cell.events.length > 0 && (
+													<ul class="eventual-month__events">
+														{cell.events.map((event) => (
+															<li class:list={[event.status === "cancelled" && "eventual-is-cancelled"]}>
+																<a href={eventHref(event, data)}>
+																	<span class="eventual-month__time">{event.allDay ? text.event.allDay : eventTimeParts(event, locale)?.start}</span>
+																	<span class="eventual-month__name">{event.title}</span>
+																</a>
+																<StatusBadge event={event} text={text} locale={locale} />
+															</li>
+														))}
+													</ul>
+												)}
+											</td>
+										))}
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+					<div class="eventual-month-list" data-narrow-month>
 						{data.dateGroups.map((group) => (
-							<li>
-								<H3 class="eventual-month-list__day">{group.label}</H3>
-								<ul class="eventual-stack">
+							<section class="eventual-group" aria-labelledby={`${group.id}-m`}>
+								<header class="eventual-group__header">
+									<DateTile date={group.date} locale={locale} layout="short" labelled={false} />
+									<H3 id={`${group.id}-m`} class="eventual-group__title">{group.label}</H3>
+								</header>
+								<ul class="eventual-rows">
 									{group.events.map((event) => <li><AgendaItem event={event} data={data} level={level3 + 1} showDate={false} compact /></li>)}
 								</ul>
-							</li>
+							</section>
 						))}
-					</ul>
+					</div>
 				</>
 			)}
 		</section>
 	)}
 
 	{data.subscriptionUrl && (
-		<p class="eventual-subscribe"><a class="eventual-button" href={data.subscriptionUrl}>{text.calendar.subscribe}</a></p>
+		<p class="eventual-subscribe"><Icon name="rss" /><a href={data.subscriptionUrl}>{text.calendar.subscribe}</a></p>
 	)}
 </section>

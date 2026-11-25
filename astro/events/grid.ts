@@ -159,6 +159,19 @@ export function eventTimeRange(event: PublicEvent, locale: string): string {
 	}
 }
 
+/** Start and end time ("18:15", "19:15") and the zone ("CET") for a compact time column; null for all-day events. */
+export function eventTimeParts(event: PublicEvent, locale: string): { start: string; end: string; zone: string } | null {
+	if (event.allDay) return null;
+	try {
+		const time = new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "2-digit", timeZone: event.timezone });
+		const zone = new Intl.DateTimeFormat(locale, { timeZone: event.timezone, timeZoneName: "short" })
+			.formatToParts(new Date(event.start)).find((part) => part.type === "timeZoneName")?.value ?? event.timezone;
+		return { start: time.format(new Date(event.start)), end: time.format(new Date(event.end)), zone };
+	} catch {
+		return null;
+	}
+}
+
 export function monthLabel(month: string, locale: string): string {
 	const [year, monthNumber] = month.split("-").map(Number);
 	return new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" })

@@ -2,49 +2,73 @@
 import type { PublicEvent } from "../../feed";
 import type { EventBrowserData } from "../index";
 import { eventHref } from "../index";
-import { eventStartDate, eventTimeRange } from "../grid";
+import { eventStartDate, eventTimeParts, eventTimeRange } from "../grid";
 import { safeImageUrl } from "../links";
 import { safeWebUrl } from "../../event-details";
 import { descriptionExcerpt } from "../description";
+import DateTile from "./DateTile.astro";
+import Icon from "./Icon.astro";
 import StatusBadge from "./StatusBadge.astro";
 
 interface Props {
 	event: PublicEvent;
 	data: EventBrowserData;
 	level: number;
-	/** Show the date block (off inside a list already grouped by date). */
+	/** Show the date (off inside a list already grouped by date). */
 	showDate?: boolean;
-	/** Title, time and place only. */
+	/** A row in a grouped list: time column, title and place. */
 	compact?: boolean;
+	/** Show the place (off inside a list already grouped by place). */
+	showPlace?: boolean;
 }
 
-const { event, data, level, showDate = true, compact = false } = Astro.props;
+const { event, data, level, showDate = true, compact = false, showPlace = true } = Astro.props;
 const { text, locale } = data;
 const Heading = `h${Math.min(6, level)}` as "h3";
 const dateKey = eventStartDate(event);
-const date = new Date(`${dateKey}T12:00:00Z`);
-const format = (options: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(locale, { ...options, timeZone: "UTC" }).format(date);
 const imageUrl = compact ? "" : safeImageUrl(event.imageMedia?.src || event.imageUrl, data.origin);
 const directionsUrl = safeWebUrl(event.directionsUrl);
 const contentLang = event.locale && event.locale.split("-")[0] !== data.lang.split("-")[0] ? event.locale : undefined;
+const time = eventTimeParts(event, locale);
+const shortDate = new Intl.DateTimeFormat(locale, { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${dateKey}T12:00:00Z`));
+const fullDate = new Intl.DateTimeFormat(locale, { dateStyle: "full", timeZone: "UTC" }).format(new Date(`${dateKey}T12:00:00Z`));
 ---
 
-<article class:list={["eventual-agenda", compact && "eventual-agenda--compact", event.status === "cancelled" && "eventual-is-cancelled"]} lang={contentLang}>
-	{showDate && (
-		<time class="eventual-agenda__date" datetime={dateKey}>
-			<span aria-hidden="true">{format({ weekday: "short" })}</span>
-			<strong aria-hidden="true">{format({ day: "numeric" })}</strong>
-			<span aria-hidden="true">{format({ month: "short" })}</span>
-			<span class="eventual-sr-only">{format({ dateStyle: "full" })}</span>
-		</time>
-	)}
-	{imageUrl && <img class="eventual-agenda__image" src={imageUrl} alt="" width={event.imageMedia?.width} height={event.imageMedia?.height} loading="lazy" decoding="async" />}
-	<div class="eventual-agenda__body">
-		<p class="eventual-agenda__time">{event.allDay ? text.event.allDay : eventTimeRange(event, locale)}</p>
-		<Heading class="eventual-agenda__title"><a href={eventHref(event, data)}>{event.title}</a> <StatusBadge event={event} text={text} locale={locale} /></Heading>
-		{event.location && (
-			<p class="eventual-agenda__place">{event.location}{directionsUrl && <> · <a href={directionsUrl} target="_blank" rel="noopener noreferrer">{text.event.directions}<span class="eventual-sr-only"> {text.newTab}</span></a></>}</p>
-		)}
-		{!compact && event.description && <p class="eventual-agenda__excerpt">{descriptionExcerpt(event.description)}</p>}
-	</div>
-</article>
+{compact ? (
+	<article class:list={["eventual-row", event.status === "cancelled" && "eventual-is-cancelled"]} lang={contentLang}>
+		<p class="eventual-row__when">
+			{showDate && <time class="eventual-row__date" datetime={dateKey}><span aria-hidden="true">{shortDate}</span><span class="eventual-sr-only">{fullDate}</span></time>}
+			{time ? (
+				<>
+					<span class="eventual-row__start">{time.start}</span>
+					<span class="eventual-row__end">– {time.end} {time.zone}</span>
+				</>
+			) : <span class="eventual-row__start">{text.event.allDay}</span>}
+		</p>
+		<div class="eventual-row__body">
+			<Heading class="eventual-row__title"><a class="eventual-cover" href={eventHref(event, data)}>{event.title}</a> <StatusBadge event={event} text={text} locale={locale} /></Heading>
+			{showPlace && event.location && (
+				<p class="eventual-meta">
+					<Icon name="pin" /><span>{event.location}{directionsUrl && <> · <a class="eventual-raise" href={directionsUrl} target="_blank" rel="noopener noreferrer">{text.event.directions}<span class="eventual-sr-only"> {text.newTab}</span></a></>}</span>
+				</p>
+			)}
+		</div>
+	</article>
+) : (
+	<article class:list={["eventual-agenda", imageUrl && "eventual-agenda--media", event.status === "cancelled" && "eventual-is-cancelled"]} lang={contentLang}>
+		{showDate && <DateTile date={dateKey} locale={locale} class="eventual-agenda__date" />}
+		<div class="eventual-agenda__body">
+			<Heading class="eventual-agenda__title"><a class="eventual-cover" href={eventHref(event, data)}>{event.title}</a> <StatusBadge event={event} text={text} locale={locale} /></Heading>
+			<div class="eventual-meta-group">
+				<p class="eventual-meta"><Icon name="clock" /><span>{event.allDay ? text.event.allDay : eventTimeRange(event, locale)}</span></p>
+				{event.location && (
+					<p class="eventual-meta">
+						<Icon name="pin" /><span>{event.location}{directionsUrl && <> · <a class="eventual-raise" href={directionsUrl} target="_blank" rel="noopener noreferrer">{text.event.directions}<span class="eventual-sr-only"> {text.newTab}</span></a></>}</span>
+					</p>
+				)}
+			</div>
+			{event.description && <p class="eventual-agenda__excerpt">{descriptionExcerpt(event.description)}</p>}
+		</div>
+		{imageUrl && <div class="eventual-agenda__media"><img src={imageUrl} alt="" width={event.imageMedia?.width} height={event.imageMedia?.height} loading="lazy" decoding="async" /></div>}
+	</article>
+)}

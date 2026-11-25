@@ -6,12 +6,15 @@ import { displayDate, eventEndDate, eventStartDate, eventTimeRange } from "../gr
 import { safeImageUrl } from "../links";
 import { safeWebUrl } from "../../event-details";
 import { descriptionExcerpt } from "../description";
+import DateTile from "./DateTile.astro";
+import Icon from "./Icon.astro";
 import StatusBadge from "./StatusBadge.astro";
 
 interface Props {
 	event: PublicEvent;
 	data: EventBrowserData;
 	level: number;
+	/** "grid": image on top, date tile beside the title. "timeline": text beside a thumbnail, no date (the timeline shows it). */
 	variant?: "grid" | "timeline";
 }
 
@@ -21,28 +24,37 @@ const Heading = `h${Math.min(6, level)}` as "h3";
 const href = eventHref(event, data);
 const imageUrl = safeImageUrl(event.imageMedia?.src || event.imageUrl, data.origin);
 const directionsUrl = safeWebUrl(event.directionsUrl);
-const sameDay = eventStartDate(event) === eventEndDate(event);
-const start = displayDate(event.start, locale, event.timezone, event.allDay);
-const end = displayDate(event.end, locale, event.timezone, event.allDay);
-const time = event.allDay ? text.event.allDay : eventTimeRange(event, locale);
+const startDate = eventStartDate(event);
+const sameDay = startDate === eventEndDate(event);
+const time = event.allDay ? (sameDay ? text.event.allDay : "") : eventTimeRange(event, locale);
 const contentLang = event.locale && event.locale.split("-")[0] !== data.lang.split("-")[0] ? event.locale : undefined;
+const grid = variant === "grid";
 ---
 
-<article class:list={["eventual-card", `eventual-card--${variant}`, event.status === "cancelled" && "eventual-is-cancelled"]} lang={contentLang}>
-	{imageUrl && <img class="eventual-card__image" src={imageUrl} alt="" width={event.imageMedia?.width} height={event.imageMedia?.height} loading="lazy" decoding="async" />}
+<article class:list={["eventual-card", `eventual-card--${variant}`, imageUrl && "eventual-card--media", event.status === "cancelled" && "eventual-is-cancelled"]} lang={contentLang}>
+	{imageUrl && <div class="eventual-card__media"><img src={imageUrl} alt="" width={event.imageMedia?.width} height={event.imageMedia?.height} loading="lazy" decoding="async" /></div>}
 	<div class="eventual-card__body">
-		<p class="eventual-card__when">
-			<time datetime={event.start}>{start}</time>
-			{!sameDay && <> – <time datetime={event.end}>{end}</time></>}
-			{time && <> · {time}</>}
-		</p>
-		<Heading class="eventual-card__title"><a href={href}>{event.title}</a> <StatusBadge event={event} text={text} locale={locale} /></Heading>
-		{event.location && (
-			<p class="eventual-card__place">{event.location}{directionsUrl && <> · <a href={directionsUrl} target="_blank" rel="noopener noreferrer">{text.event.directions}<span class="eventual-sr-only"> {text.newTab}</span></a></>}</p>
-		)}
-		{event.organizer && <p class="eventual-card__organizer">{text.event.organizer(event.organizer)}</p>}
+		<div class="eventual-card__head">
+			{grid && <DateTile date={startDate} locale={locale} layout="short" class="eventual-card__tile" />}
+			<Heading class="eventual-card__title"><a class="eventual-cover" href={href}>{event.title}</a> <StatusBadge event={event} text={text} locale={locale} /></Heading>
+		</div>
+		<div class="eventual-meta-group">
+			<p class="eventual-meta">
+				<Icon name="clock" />
+				<span>
+					{!sameDay && <><time datetime={event.start}>{displayDate(event.start, locale, event.timezone, event.allDay)}</time> – <time datetime={event.end}>{displayDate(event.end, locale, event.timezone, event.allDay)}</time>{time && " · "}</>}
+					{time}
+				</span>
+			</p>
+			{event.location && (
+				<p class="eventual-meta">
+					<Icon name="pin" /><span>{event.location}{directionsUrl && <> · <a class="eventual-raise" href={directionsUrl} target="_blank" rel="noopener noreferrer">{text.event.directions}<span class="eventual-sr-only"> {text.newTab}</span></a></>}</span>
+				</p>
+			)}
+			{grid && event.organizer && <p class="eventual-meta"><Icon name="user" /><span>{text.event.organizer(event.organizer)}</span></p>}
+		</div>
 		{event.description && <p class="eventual-card__excerpt">{descriptionExcerpt(event.description)}</p>}
-		{event.categories.length > 0 && (
+		{grid && event.categories.length > 0 && (
 			<ul class="eventual-tags" aria-label={text.event.categories}>
 				{event.categories.map((category) => <li>{category}</li>)}
 			</ul>

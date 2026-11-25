@@ -1,0 +1,24 @@
+---
+/** A calendar date shown as a tile (weekday, day number, month). The visible parts are hidden from
+    screen readers; the full date is read instead unless `labelled` is false (a heading says it). */
+interface Props {
+	/** YYYY-MM-DD */
+	date: string;
+	locale: string;
+	/** "stack": weekday, day, month. "short": day over month. */
+	layout?: "stack" | "short";
+	labelled?: boolean;
+	class?: string;
+}
+
+const { date, locale, layout = "stack", labelled = true, class: className } = Astro.props;
+const value = new Date(`${date}T12:00:00Z`);
+const format = (options: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(locale, { ...options, timeZone: "UTC" }).format(value);
+---
+
+<time class:list={["eventual-tile", `eventual-tile--${layout}`, className]} datetime={date}>
+	{layout === "stack" && <span class="eventual-tile__weekday" aria-hidden="true">{format({ weekday: "short" })}</span>}
+	<span class="eventual-tile__day" aria-hidden="true">{format({ day: "numeric" })}</span>
+	<span class="eventual-tile__month" aria-hidden="true">{format({ month: "short" })}</span>
+	{labelled && <span class="eventual-sr-only">{format({ dateStyle: "full" })}</span>}
+</time>
