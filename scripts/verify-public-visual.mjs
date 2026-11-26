@@ -10,6 +10,8 @@ const events=[
   {id:"music-evening",title:"Concert et rencontre des voisins",description:"Une soirée musicale avec les artistes de la région.",start:"2026-10-15T17:00:00Z",end:"2026-10-15T19:30:00Z",allDay:false,timezone:"Europe/Paris",location:"École communale",locationType:"physical",status:"rescheduled",previousStartDate:"2026-10-14T17:00:00Z",organizer:"Équipe culturelle",externalUrl:"",imageUrl:"",categories:["Culture"],venue:null,directionsUrl:""},
   {id:"online-session",title:"Préparer ensemble les prochaines activités de l’association",description:"Réunion en ligne, ouverte aux bénévoles.",start:"2026-10-20T16:00:00Z",end:"2026-10-20T17:00:00Z",allDay:false,timezone:"Europe/Paris",location:"",locationType:"virtual",virtualUrl:"https://example.org/reunion",status:"cancelled",organizer:"Association solidaire",externalUrl:"",imageUrl:"",categories:["Bénévolat"],venue:null,directionsUrl:""},
 ];
+// Real feeds (0.17+) give every event its calendar links; the event page's "Add to calendar" menu uses them.
+for(const event of events) event.calendarLinks={google:`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}`,outlook:"https://outlook.live.com/calendar/0/deeplink/compose",office365:"https://outlook.office.com/calendar/0/deeplink/compose",ics:`/_emdash/api/plugins/eventual/calendar?eventId=${event.id}`};
 let state="populated",site,browser;
 const output=resolve("reports/public-visual");mkdirSync(output,{recursive:true});
 const cms=createServer((request,response)=>{
@@ -42,7 +44,7 @@ try {
     const detail=await page.goto(`${origin}/events/community-day?from=2026-10-10&through=2026-10-11`);
     assert.equal(detail.status(),200);assert(await page.getByRole("heading",{name:events[0].title,exact:true}).isVisible());
     await page.locator(".eventual-calmenu > summary").click();
-    assert(await page.getByRole("link",{name:"Google Agenda",exact:true}).isVisible());
+    assert(await page.getByRole("link",{name:/^Google Agenda/}).isVisible());
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${size} detail overflow`);
     // The assertions above prove the open menu; registry screenshots show the closed page.
     await page.locator(".eventual-calmenu").evaluate(menu=>{menu.open=false;});

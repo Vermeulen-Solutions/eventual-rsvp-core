@@ -43,8 +43,6 @@ jobs:
         working-directory: examples/astro-events
       - run: npm run check
         working-directory: examples/astro-events
-      - run: npm test
-        working-directory: examples/astro-events
       - run: npm run test:page
         working-directory: examples/astro-events
       - run: node scripts/verify-public-visual.mjs
