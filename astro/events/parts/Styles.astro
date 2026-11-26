@@ -1267,6 +1267,12 @@
 		min-inline-size: 0;
 	}
 
+	/* The column's gap spaces its blocks: a slotted form's own outer margin (RsvpForm has 1.5rem)
+	   would push it below the info panel. Two classes, so it wins over components in this layer. */
+	.eventual-detail .eventual-detail__main > * {
+		margin-block: 0;
+	}
+
 	@container eventual (min-width: 50rem) {
 		.eventual-detail__layout {
 			grid-template-columns: minmax(0, 1fr) minmax(17rem, 21rem);

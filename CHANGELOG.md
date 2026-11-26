@@ -2,6 +2,11 @@
 
 All notable changes to Eventual RSVP – Core (formerly Eventual) are documented here.
 
+## 0.19.1 - 2026-11-26
+
+- **`EventDetail`:** a form placed inside it (Registrations' `RsvpForm`) now starts level with the info panel. The column's spacing replaces the form's own outer margin, which pushed it 1.5rem lower. Tickets' `TicketCheckout` keeps its margin until Tickets moves its styles into the `eventual` cascade layer.
+- No other changes.
+
 ## 0.19.0 - 2026-11-26
 
 - **Event pages in the package.** `@vermeulen.solutions/eventual/astro/EventBrowser.astro` (seven views: list, timeline, cards, schedule, date strip, month, locations; month navigation, category filter, subscription link) and `@vermeulen.solutions/eventual/astro/EventDetail.astro` (details, "Add to calendar" with Google, Outlook, Office 365 and the event's `.ics`, subscription link, Event JSON-LD, a slot for `RsvpForm` or `TicketCheckout`). Loaders in `@vermeulen.solutions/eventual/astro/events`: `loadEventBrowser`, `loadEventDetail` (with the HTTP status: 502 when the feed fails, 404 for an unknown event), the pure `buildEventBrowserData` and `buildEventDetailData`, and `eventContentId` and `occurrenceStart` for the Registrations and Tickets components. See [Event pages](./docs/developer-guide.md#event-pages).

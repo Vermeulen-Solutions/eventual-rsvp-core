@@ -1,3 +1,7 @@
+## 0.19.1
+
+On the event page, a registration form now lines up with the event's info panel. No permission or schema changes.
+
 ## 0.19.0
 
 Ready-made event pages for Astro sites in the npm package: an events page with seven views and an event page with calendar buttons, in 21 languages, light and dark. The plugin itself is unchanged: no permission or schema changes. [Release notes](https://github.com/Vermeulen-Solutions/eventual-rsvp-core/blob/main/docs/release-notes-0.19.0.md).
