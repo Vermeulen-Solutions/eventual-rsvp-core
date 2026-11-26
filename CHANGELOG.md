@@ -2,6 +2,13 @@
 
 All notable changes to Eventual RSVP – Core (formerly Eventual) are documented here.
 
+## 0.19.3 - 2026-11-26
+
+- **Agent skill for coding agents.** The npm package now contains `skills/eventual-rsvp`, an Agent Skill (the format EmDash's own skills use) for Claude Code, Codex, opencode and others: install routes, collections, plugin IDs, the event pages, Registrations' and Tickets' forms, and theming. Copy it into a project's `.agents/skills/` or `.claude/skills/`. The website also serves the docs for agents at [eventual.rsvp/llms.txt](https://eventual.rsvp/llms.txt).
+- **Registry plugin IDs are documented.** They are the same on every site: Core `r_hxn32uyal53iahxf`, Registrations `r_lywzrupdtpjvkohn`, Tickets `r_qd5hk435vo2yqk2n`.
+- **Registry screenshots** show the 0.19 event pages and settings.
+- No code, permission or schema changes.
+
 ## 0.19.2 - 2026-11-26
 
 - **Event excerpts read as text.** The short description in the list, card and timeline views joined a description's blocks with spaces, so a heading ran into its list ("What to bring Your imagination A favourite sketchbook…"). Blocks are now joined as a sentence: a colon before a list, semicolons between its items, a full stop after a heading. Link addresses in brackets are left out.
