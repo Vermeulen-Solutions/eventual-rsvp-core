@@ -24,7 +24,7 @@ Pages using them need `export const prerender = false` and should set `Astro.res
 | `views`, `defaultView` | all seven, `list` | Offered views, in order: `list`, `timeline`, `cards`, `schedule`, `dates`, `month`, `locations`. |
 | `view`, `month`, `category` | from the query string | Fix a value instead of reading `?view=`, `?month=YYYY-MM`, `?category=`. |
 
-`loadEventDetail(Astro.url, Astro.params.id, options)` accepts an event slug or ID; pass it the same options as the events page (`basePath` sets its back link and `locale` its texts; `timeZone` matters little there, as event times use the event's own zone). It searches from today through one year by default; `?from=YYYY-MM-DD&through=YYYY-MM-DD` narrows it and picks the right date of a recurring event.
+`loadEventDetail(Astro.url, Astro.params.id, options)` accepts an event slug or ID (a past event is found only with its `?from=` date; links from `EventBrowser` always include it); pass it the same options as the events page (`basePath` sets its back link and `locale` its texts; `timeZone` matters little there, as event times use the event's own zone). It searches from today through one year by default; `?from=YYYY-MM-DD&through=YYYY-MM-DD` narrows it and picks the right date of a recurring event.
 
 Pure variants for tests or the SSR dispatcher: `buildEventBrowserData(events, url, options)` and `buildEventDetailData(events, id, url, options)` (pass `null` as `events` for a failed feed).
 
@@ -33,6 +33,8 @@ Pure variants for tests or the SSR dispatcher: `buildEventBrowserData(events, ur
 `locale` takes any BCP 47 tag (`fr-CH`, `pt-BR`, `de-AT`). Dates and the first day of the week follow the full tag; texts use the closest of 21 shipped languages (English, French, German, Dutch, Spanish, Italian, Portuguese and Brazilian Portuguese, Polish, Czech, Swedish, Danish, Norwegian, Finnish, Japanese, Chinese, Korean, Turkish, Ukrainian, Arabic, Hebrew), else English. `data.lang` and `data.dir` give the language and direction actually used: put them on `<html>`. Registrations' and Tickets' components take the same tags in their `locale` prop.
 
 ## Component props
+
+Neither component renders `<main>` or a page `<h1>` outside itself: put them inside the layout's `<main>` (they render the page heading as `<h1>` by default; `headingLevel={2}` when the page already has one). `EventBrowser`'s `id` (default `eventual-events`) is its root element's ID, usable as a skip-link target.
 
 - `EventBrowser`: `data` (required), `headingLevel` (1, or 2 inside another page), `title`, `intro` (`false` for none), `id`, `showFilter`, `showViewSwitch`, `scheme`, `class`.
 - `EventDetail`: `data` (required), `headingLevel`, `backHref` (`false` for none), `showSubscribe`, `jsonLd` (Event structured data, default on), `scheme`, `class`. Its default slot renders after the description: put `RsvpForm` or `TicketCheckout` there.
