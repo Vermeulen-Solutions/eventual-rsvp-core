@@ -45,6 +45,7 @@
     "dist/*.d.mts",
     "emdash-plugin.jsonc",
     "astro",
+    "skills",
     "transfer",
     "src/domain",
     "src/schema",

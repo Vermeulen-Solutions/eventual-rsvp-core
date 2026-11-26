@@ -5,6 +5,8 @@ EmDash collections own content, rich text, languages, drafts, revisions and publ
 The [public feed caching guide](public-feed-caching.md) describes additive
 dependency/expiry metadata, direct runtime dispatch and the host's explicit opt-in.
 
+Building with a coding agent? Give it the [eventual-rsvp skill](../skills/eventual-rsvp/SKILL.md) (also inside the npm package under `skills/`) or point it at [eventual.rsvp/llms.txt](https://eventual.rsvp/llms.txt).
+
 ## Versions and where to get them
 
 One version number covers everything. Use the same one in all three places:

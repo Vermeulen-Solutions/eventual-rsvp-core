@@ -136,6 +136,7 @@ The backend shares EmDash's sandbox call budget: the public feeds use up to 30 c
 - [Developer guide](./docs/developer-guide.md) — integration and API reference.
 - [Changelog](./CHANGELOG.md) · [0.19.0 release notes](./docs/release-notes-0.19.0.md) · [0.18.7 release notes](./docs/release-notes-0.18.7.md) · [0.18.6 release notes](./docs/release-notes-0.18.6.md) · [0.18.5 release notes](./docs/release-notes-0.18.5.md) · [0.15.0 cache integration](./docs/release-notes-0.15.0.md) · [0.14.0 native collections](./docs/release-notes-0.14.0.md).
 - [Astro example site](./examples/astro-events/README.md) — the event pages in a small site.
+- [Agent skill](./skills/eventual-rsvp/SKILL.md) — for coding agents (Claude Code, Codex, opencode and others) building an Eventual site: copy `skills/eventual-rsvp` into the project's `.agents/skills/` or `.claude/skills/`. Docs as Markdown for agents: [eventual.rsvp/llms.txt](https://eventual.rsvp/llms.txt).
 - [Release evidence and older records](./docs/history.md).
 
 ---
