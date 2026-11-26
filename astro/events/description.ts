@@ -20,16 +20,35 @@ export function descriptionHtml(blocks: unknown[] | undefined, text: string, opt
 	return Array.isArray(blocks) && blocks.length ? portableTextHtml(blocks, options) : markdownHtml(text, options);
 }
 
-/** A plain one-paragraph excerpt for lists and cards. */
+/**
+ * A plain one-paragraph excerpt for lists and cards. Blocks (paragraphs, headings, list items)
+ * are joined as a sentence would be: a colon before a list, semicolons between its items and a
+ * full stop after a heading, so "What to bring" and its list do not run together.
+ */
 export function descriptionExcerpt(source: string, limit = 180): string {
-	const plain = source
-		.replace(/<[^>]*>/g, " ")
-		.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
-		.replace(/(^|\s)#{1,3}\s+/g, "$1")
-		.replace(/\*\*|__|[*_]/g, "")
-		.replace(/(^|\s)[-*]\s+/g, "$1")
-		.replace(/\s+/g, " ")
-		.trim();
+	const text = source
+		.replace(/<li\b[^>]*>/gi, "\n- ")
+		.replace(/<br\s*\/?>|<\/(?:p|li|h[1-6]|div|blockquote)>/gi, "\n")
+		.replace(/<[^>]*>/g, " ");
+	const blocks = text.split(/\n+/).map((line) => ({
+		list: /^\s*(?:[-*+]|\d+[.)])\s+/.test(line),
+		text: line
+			.replace(/^\s*#{1,6}\s+/, "")
+			.replace(/^\s*(?:[-*+]|\d+[.)])\s+/, "")
+			.replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+			.replace(/\s*\(https?:\/\/[^\s)]+\)/g, "")
+			.replace(/\*\*|__|[*_`]/g, "")
+			.replace(/\s+/g, " ")
+			.trim(),
+	})).filter((block) => block.text);
+	let plain = "";
+	blocks.forEach((block, index) => {
+		plain += block.text;
+		const next = blocks[index + 1];
+		if (!next) return;
+		if (/[.!?…:;,]$/.test(block.text)) plain += " ";
+		else plain += block.list && next.list ? "; " : next.list ? ": " : ". ";
+	});
 	if (plain.length <= limit) return plain;
 	const cut = plain.slice(0, limit + 1);
 	const boundary = cut.lastIndexOf(" ");

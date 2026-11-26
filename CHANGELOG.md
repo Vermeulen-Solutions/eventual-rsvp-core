@@ -2,6 +2,11 @@
 
 All notable changes to Eventual RSVP – Core (formerly Eventual) are documented here.
 
+## 0.19.2 - 2026-11-26
+
+- **Event excerpts read as text.** The short description in the list, card and timeline views joined a description's blocks with spaces, so a heading ran into its list ("What to bring Your imagination A favourite sketchbook…"). Blocks are now joined as a sentence: a colon before a list, semicolons between its items, a full stop after a heading. Link addresses in brackets are left out.
+- No other changes.
+
 ## 0.19.1 - 2026-11-26
 
 - **`EventDetail`:** a form placed inside it (Registrations' `RsvpForm`) now starts level with the info panel. The column's spacing replaces the form's own outer margin, which pushed it 1.5rem lower. Tickets' `TicketCheckout` keeps its margin until Tickets moves its styles into the `eventual` cascade layer.

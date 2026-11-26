@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/Vermeulen-Solutions/eventual-rsvp-core/actions/workflows/ci.yml"><img src="https://github.com/Vermeulen-Solutions/eventual-rsvp-core/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
   <a href="https://www.npmjs.com/package/@vermeulen.solutions/eventual"><img src="https://img.shields.io/npm/v/%40vermeulen.solutions%2Feventual?color=176b57&label=npm%20helpers" alt="Latest npm version of the helpers" /></a>
-  <a href="https://plugins.emdashcms.com/plugins/@vermeulen.solutions/eventual"><img src="https://img.shields.io/badge/EmDash_Registry-0.19.1-0b4d3d" alt="EmDash Plugin Registry" /></a>
+  <a href="https://plugins.emdashcms.com/plugins/@vermeulen.solutions/eventual"><img src="https://img.shields.io/badge/EmDash_Registry-0.19.2-0b4d3d" alt="EmDash Plugin Registry" /></a>
   <a href="https://emdashcms.com"><img src="https://img.shields.io/badge/EmDash-1.2%20to%201.6-0b4d3d" alt="EmDash Compatibility" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-d89521" alt="License: MIT" /></a>
   <img src="https://img.shields.io/badge/TypeScript-strict-3178c6" alt="TypeScript Strict" />
@@ -18,7 +18,7 @@
 
 Plan and publish events in [EmDash CMS](https://emdashcms.com). Write announcements, choose venues and organizers, set repeat schedules, and share events through your website and calendar subscriptions.
 
-**Current release: 0.19.1**, the same version on the EmDash Registry and on npm. Events are edited in EmDash's own collections, with rich text, images, drafts and translations. Your site builder adds the visitor pages from the package; the screenshots below show them.
+**Current release: 0.19.2**, the same version on the EmDash Registry and on npm. Events are edited in EmDash's own collections, with rich text, images, drafts and translations. Your site builder adds the visitor pages from the package; the screenshots below show them.
 
 In 0.14.x, old events stored inside the plugin are shown only when an administrator explicitly enables **Show old events saved inside the plugin**. Native collections remain authoritative. See [what changed](./docs/release-notes-0.14.0.md).
 

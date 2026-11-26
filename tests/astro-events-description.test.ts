@@ -46,4 +46,12 @@ describe("event descriptions", () => {
 		expect(long.endsWith("…")).toBe(true);
 		expect(long.length).toBeLessThanOrEqual(182);
 	});
+
+	it("joins headings and list items as a sentence", () => {
+		expect(descriptionExcerpt("A drawing workshop.\n\nWhat to bring\n\n- Your imagination\n\n- A sketchbook, if you have one\n\n- Comfortable clothes\n\nMaterials are on site. More on the workshop page (https://example.com/drawing)."))
+			.toBe("A drawing workshop. What to bring: Your imagination; A sketchbook, if you have one; Comfortable clothes. Materials are on site. More on the workshop page.");
+		expect(descriptionExcerpt("## Plan\nWe meet at ten.")).toBe("Plan. We meet at ten.");
+		expect(descriptionExcerpt("<p>Bring:</p><ul><li>water</li><li>a hat</li></ul>")).toBe("Bring: water; a hat");
+		expect(descriptionExcerpt("1. First\n2. Second")).toBe("First; Second");
+	});
 });

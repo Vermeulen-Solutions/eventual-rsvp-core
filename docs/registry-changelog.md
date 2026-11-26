@@ -1,3 +1,7 @@
+## 0.19.2
+
+Event excerpts on the events page read as sentences: a heading no longer runs into its list. No permission or schema changes.
+
 ## 0.19.1
 
 On the event page, a registration form now lines up with the event's info panel. No permission or schema changes.
