@@ -59,7 +59,7 @@ export async function readEventSource(ctx: EventualContext, through?: string) {
   if (!schema) {
     // Private plugin storage is pre-0.13 data: public reads use it only on explicit opt-in.
     if (!(await legacyReadsEnabled(ctx)))
-      reject('Events are not connected to a content type. Turn on "Show old events saved inside the plugin".');
+      reject('Events are not connected to a content type. Choose one under Event settings.');
     return {
       native: false,
       events: (await listEvents(ctx, {

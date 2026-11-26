@@ -121,7 +121,7 @@ describe("Native pagination and source authority", () => {
       settings: { get: async () => undefined },
       storage: { events: { query } },
     } as unknown as EventualContext;
-    await expect(readEventSource(ctx)).rejects.toThrow(/old events saved inside the plugin/i);
+    await expect(readEventSource(ctx)).rejects.toThrow(/not connected to a content type. Choose one under Event settings/i);
     expect(query).not.toHaveBeenCalled();
   });
 
@@ -168,7 +168,7 @@ describe("Native pagination and source authority", () => {
       settings: { get: async (key: string) => (key === "legacyReads" ? "true" : undefined) },
       storage: { events: { query } },
     } as unknown as EventualContext;
-    await expect(readEventSource(ctx)).rejects.toThrow(/old events saved inside the plugin/i);
+    await expect(readEventSource(ctx)).rejects.toThrow(/not connected to a content type. Choose one under Event settings/i);
     expect(query).not.toHaveBeenCalled();
   });
 

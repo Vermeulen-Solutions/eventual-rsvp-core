@@ -59,7 +59,7 @@ EmDash keeps each plugin's own data under its plugin ID. A Registry install has 
 
 What stays behind, and what to do:
 
-- **Settings.** Select the collections again under **Event settings** (or with the `updateSettings` tool), and set the default time zone again.
+- **Settings.** Select the collections again under **Event settings** (or with the `updateSettings` tool).
 - **Calendar subscribers.** The subscription address contains the plugin ID. Anyone subscribed to `/_emdash/api/plugins/eventual/calendar` gets "not found" once the old install is removed, and their calendar app stops updating without telling them. Update the links on your pages before the move, and tell regular subscribers the new address, or keep the old address working with a redirect on your site.
 - **Calendar state.** Update counters (`SEQUENCE`) start again from 0, and cancellations already sent are not sent again. Calendar apps that re-read the subscription are not affected; an event a visitor imported as a single `.ics` file may not update.
 - **Old events stored inside the plugin** (from before 0.13): migrate them to a collection first, as in [upgrading](upgrade-0.13.0.md).
@@ -84,7 +84,7 @@ Routes are relative to `/_emdash/api/plugins/<pluginId>/`.
 
 | Route | Inputs and behavior |
 | --- | --- |
-| `GET publicEvents` | Inclusive `from`/`through` dates (YYYY-MM-DD); default UTC today through 180 days later; maximum 366 inclusive dates. Also `locale`, `strict` (false), `category`, `publicUrls` (true). |
+| `GET publicEvents` | Inclusive `from`/`through` dates (YYYY-MM-DD); default UTC today through 180 days later; maximum 366 inclusive dates. Also `locale`, `strict` (false), `category`, `publicUrls` (true), and `eventId` for one event (`<id>`) or one of its dates (`<id>#<date>`). |
 | `GET calendar` | Raw text/calendar; fixed window from UTC today through 365 days later. Supports locale, strict and category. |
 | `GET calendar?eventId=…` | The same format for one event: its upcoming dates, or one date with an occurrence ID (`<id>#<date>`, as in the JSON feed). The entry is chosen by its ID, so no `locale` is needed. Same UID as in the subscription. 404 when the event is unknown, unpublished or over. |
 | `GET publicEventImage?eventId=…` | Published featured image with MIME/size checks; absent, unpublished or disabled legacy images return 404. |

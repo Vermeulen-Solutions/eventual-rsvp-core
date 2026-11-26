@@ -4,7 +4,7 @@ Requires EmDash `>=1.2.0 <2.0.0` (1.4.0 or newer recommended) and Node 24+ for t
 
 ## Install (choose one route per plugin)
 
-**From the EmDash Registry** (most sites): Admin → Plugins → Registry, search "Eventual RSVP" (publisher vermeulen.solutions), review the permissions, install. The site still needs the npm package for the Astro components and helpers:
+**From the EmDash Registry** (most sites): Admin → Plugins → Registry, search "Eventual RSVP" (publisher vermeulen.solutions), review the permissions, install. The owner does this in the running admin; nothing goes in `astro.config.mjs`. The site still needs the npm package for the Astro components and helpers:
 
 ```sh
 npm install @vermeulen.solutions/eventual
@@ -37,18 +37,22 @@ Never both routes for the same plugin.
 
 ## Collections
 
-Core reads events, venues and organizers from EmDash collections the site owns. It cannot create them (read-only schema permission). Export the blueprint, apply it, then select the collections in **Event settings**:
+Core reads events, venues and organizers from EmDash collections the site owns. It cannot create them (read-only schema permission). Export the blueprint, apply it, then select the collections in **Event settings**. The collections can be created before or after the plugin is installed.
 
 ```sh
-npx -p @vermeulen.solutions/eventual eventual-schema --locale en --output eventual-schema.json
-# With Registrations or Tickets, add the shared capacity fields:
+npx -p @vermeulen.solutions/eventual eventual-schema --locale en --timezone Europe/London --output eventual-schema.json
+# Only with Registrations or Tickets: add the shared capacity fields, then seed that file instead.
 npx -p @vermeulen.solutions/eventual-capacity eventual-capacity-fields --merge eventual-schema.json --output eventual-schema-with-capacity.json
-# New local SQLite site:
-npx emdash seed eventual-schema-with-capacity.json --validate
-npx emdash seed eventual-schema-with-capacity.json --database ./data.db --no-content --on-conflict error
+# Local SQLite site (use the site's real database path):
+npx emdash seed eventual-schema.json --validate
+npx emdash seed eventual-schema.json --database ./data.db --no-content --on-conflict error
 ```
 
-Options: `--timezone Europe/London` (default for new events; otherwise the computer's), `--event-collection activities`, `--reuse-venues`, `--reuse-organizers`. Use a locale the site already has. The exporter refuses to overwrite a file. For a populated or remote (D1) site, apply reviewed additive changes through the site's schema workflow instead of reseeding.
+Exporter options (`--help` lists them from Core 0.19.4): `--locale` (the site's default content language; default `fr`, so always pass it), `--timezone` (the time zone new events start in; otherwise the computer's), `--output` (required; it refuses to overwrite a file), `--event-collection activities`, `--venue-collection`, `--organizer-collection`, `--reuse-venues`, `--reuse-organizers`. The event collection's URL pattern is `/events/{slug}`, which matches an `src/pages/events/[id].astro` page (the loader accepts slugs). If the site's starter template ships its own seed, let EmDash apply that first, then seed Eventual's blueprint. For a populated or remote (D1) site, apply reviewed additive changes through the site's schema workflow instead of reseeding.
+
+### Event settings
+
+Admin → **Eventual RSVP** → **Event settings** (`/_emdash/admin/plugins/<coreId>/settings`). Choose **Event collection** (for example "Events (events)"), **Venue collection** and **Organizer collection**, then press **Save settings**: choices shown before saving are not stored. Leave **Show old events saved inside the plugin** off; it only serves events that versions before 0.13 stored inside the plugin, even if a "not connected" message suggests otherwise. There is no time-zone setting here: each event has its own time zone, defaulting to the blueprint's `--timezone`.
 
 Leave **Show old events saved inside the plugin** off unless migrating data from before Core 0.14.
 
@@ -90,7 +94,7 @@ Core has MCP tools for managing events (`<pluginId>__<tool>`). They are off afte
 
 A Registry install has a new ID and starts empty; data stored under the old ID stays in the database but the new install cannot read it. Events, venues and organizers (EmDash content) are not affected. What stays behind:
 
-- **Core:** settings (select the collections and default time zone again); the calendar subscription address changes (update links, tell subscribers, or redirect the old address); update counters restart; events stored inside the plugin from before 0.13 (migrate them first).
+- **Core:** settings (select the collections again); the calendar subscription address changes (update links, tell subscribers, or redirect the old address); update counters restart; events stored inside the plugin from before 0.13 (migrate them first).
 - **Registrations:** registrations, places taken, reminders, settings and the signing key for manage links. Move when no event has open registrations or upcoming bookings.
 - **Tickets:** orders, tickets sold and check-ins (buyers' QR codes stop working and their places free up, so events can be oversold), ticket types and prices, settings including Stripe keys, and the licence key (paste the licence code again). The Stripe webhook address contains the plugin ID: point Stripe at the new address the **Tickets** page shows. Move when nothing is on sale.
 

@@ -148,7 +148,7 @@ describe("Eventual compatibility routes", { timeout: 60_000 }, () => {
           { from: "2026-11-01", through: "2026-11-30" },
           { method: "GET" },
         ),
-      ).rejects.toThrow(/old events saved inside the plugin/i);
+      ).rejects.toThrow(/not connected to a content type. Choose one under Event settings/i);
     } finally {
       await runtimeHost.dispose();
     }
