@@ -99,3 +99,11 @@ A Registry install has a new ID and starts empty; data stored under the old ID s
 - **Tickets:** orders, tickets sold and check-ins (buyers' QR codes stop working and their places free up, so events can be oversold), ticket types and prices, settings including Stripe keys, and the licence key (paste the licence code again). The Stripe webhook address contains the plugin ID: point Stripe at the new address the **Tickets** page shows. Move when nothing is on sale.
 
 Point the user to the docs before they move: https://eventual.rsvp/docs/
+
+## Uninstalling
+
+EmDash removes a plugin's code and keeps its stored data and settings unless the owner ticks **Also delete plugin storage data** in the uninstall dialog. The plugins have no uninstall step of their own. Before uninstalling, remove the pages and components that call the plugin, and tell the owner:
+
+- **Core:** events, venues and organizers stay as ordinary content in the site's collections. Event pages built with Core's components and calendar subscriptions stop showing events. The box deletes only Core's settings (and events that versions before 0.13 kept inside the plugin).
+- **Registrations:** registrations, waiting lists, answers and settings stay without the box, so a reinstall resumes. Forms, links in emails already sent and reminders stop working. If it will not be reinstalled, tick the box: the data is personal data. Capacity fields on events stay.
+- **Tickets:** click **Deactivate** under **Licence** first (or later at licences.eventual.rsvp/manage). Orders, ticket types and settings, Stripe keys included, stay without the box. Checkout, order and QR pages stop working; uninstall after the last ticketed event. Delete the Stripe webhook endpoint that points to the site. Uninstalling does not cancel the yearly licence subscription.

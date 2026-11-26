@@ -32,7 +32,7 @@ These silently break sites. Check them before writing code.
 
 | Task | Read |
 | --- | --- |
-| Install, collections, plugin IDs, moving to the Registry | [references/setup.md](references/setup.md) |
+| Install, collections, plugin IDs, moving to the Registry, uninstalling | [references/setup.md](references/setup.md) |
 | Events page and event page, options, languages, theming | [references/event-pages.md](references/event-pages.md) |
 | RSVP form, manage page, ticket checkout, order and door pages | [references/registrations-and-tickets.md](references/registrations-and-tickets.md) |
 

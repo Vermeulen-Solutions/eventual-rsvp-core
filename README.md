@@ -128,6 +128,10 @@ The backend shares EmDash's sandbox call budget: the public feeds use up to 30 c
 
 ---
 
+## Uninstalling
+
+Events, venues and organizers stay: they are ordinary EmDash content in your own collections. Event pages and calendar subscriptions that read them through Core stop showing events, so remove or replace those pages first. EmDash's **Also delete plugin storage data** box removes only Core's settings, and any events that versions before 0.13 kept inside the plugin.
+
 ## Documentation
 
 - [Managing events](./docs/user-guide.md) — the editor's everyday guide.
