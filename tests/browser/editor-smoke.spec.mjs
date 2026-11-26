@@ -51,7 +51,7 @@ test('English legacy switch persists booleans and an unconfigured feed fails clo
  const unavailable=await feed();
  expect(unavailable.success).toBe(false);
  expect(unavailable.error.message).toContain('Events are not connected to a content type');
- expect(unavailable.error.message).toContain('Show old events saved inside the plugin');
+ expect(unavailable.error.message).toContain('Choose one under Event settings');
  for(const enabled of [true,false]) {
   await toggle.setChecked(enabled);
   const saved=page.waitForResponse(response=>response.url().endsWith('/plugins/eventual/admin')&&response.request().method()==='POST');

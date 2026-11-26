@@ -1,6 +1,6 @@
 {
   "name": "@vermeulen.solutions/eventual",
-  "version": "0.19.3",
+  "version": "0.19.4",
   "license": "MIT",
   "homepage": "https://eventual.rsvp/",
   "type": "module",

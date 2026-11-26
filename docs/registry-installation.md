@@ -1,4 +1,4 @@
-# Eventual RSVP – Core 0.19.3
+# Eventual RSVP – Core 0.19.4
 
 Requires EmDash **>=1.2.0 <2.0.0**; tested on 1.2.0, 1.4.0, 1.5.0 and 1.6.0. **1.4.0 or newer is recommended** for nested forms and Cloudflare plugin mutations, and required for the optional cache integration.
 

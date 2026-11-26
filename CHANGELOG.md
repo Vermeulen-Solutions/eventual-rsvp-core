@@ -2,6 +2,14 @@
 
 All notable changes to Eventual RSVP – Core (formerly Eventual) are documented here.
 
+## 0.19.4 - 2026-11-26
+
+- **A clearer "not connected" message.** When no event collection is chosen, the feeds and the admin now say "Events are not connected to a content type. Choose one under Event settings." instead of suggesting the switch for events saved inside the plugin.
+- **`eventual-schema --help`** prints the options. An unknown or invalid option prints them too and stops with exit code 2, without a stack trace.
+- **Agent skill:** a Core-only seed without Registrations' fields, the **Event settings** steps (save after choosing), no default time zone setting (each event has its own), `publicEvents` with `eventId`, page landmarks, and what uninstalling keeps and stops.
+- **Uninstalling is documented** in the README and on the Registry: events, venues and organizers stay as your own content; pages and calendar feeds that read them through Core stop showing events.
+- No permission or schema changes.
+
 ## 0.19.3 - 2026-11-26
 
 - **Agent skill for coding agents.** The npm package now contains `skills/eventual-rsvp`, an Agent Skill (the format EmDash's own skills use) for Claude Code, Codex, opencode and others: install routes, collections, plugin IDs, the event pages, Registrations' and Tickets' forms, and theming. Copy it into a project's `.agents/skills/` or `.claude/skills/`. The website also serves the docs for agents at [eventual.rsvp/llms.txt](https://eventual.rsvp/llms.txt).

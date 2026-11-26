@@ -1,6 +1,6 @@
-## 0.19.3
+## 0.19.4
 
-An agent skill for coding agents in the npm package, and new screenshots of the event pages. No code or permission changes.
+A clearer message when no event collection is chosen, `eventual-schema --help`, and what uninstalling keeps. No permission or schema changes.
 
 ## 0.19.0
 
@@ -12,6 +12,7 @@ Review fixes: readable descriptions in Google and Outlook links, admin links tha
 
 ## Earlier releases
 
+- **0.19.3:** an agent skill for coding agents in the npm package; new screenshots.
 - **0.19.2:** event excerpts read as sentences.
 - **0.19.1:** a registration form lines up with the event's info panel.
 - **0.18.6:** tested on EmDash 1.6.0; what to do before moving a site from the config to the Registry.
